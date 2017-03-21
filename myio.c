@@ -87,7 +87,7 @@ void sequential_write(unsigned long num, int t)
 
     if(returnCode < 0)
     {
-        printf("ERROR:write /mnt/ssd/test.data fail, PAGE_SIZE= %ld", , size);
+        printf("ERROR:write /mnt/ssd/test.data fail, PAGE_SIZE= %ld", size);
         exit(1);
     }
 
@@ -109,7 +109,7 @@ int main()
     for(i = 0; i < 8; i++)
     {
         random_write((unsigned long)SSD_BUFFER_SIZE / (unsigned long)(page_size*write_magnification[i]), write_magnification[i]);
-    sequential_write((unsigned long)SSD_BUFFER_SIZE / (unsigned long)(page_size*write_magnification[i],write_magnification[i]);
+    sequential_write((unsigned long)SSD_BUFFER_SIZE / (unsigned long)(page_size*write_magnification[i]),write_magnification[i]);
     }
     close(fd);
     return 0;
