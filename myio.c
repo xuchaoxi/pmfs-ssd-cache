@@ -81,14 +81,16 @@ void sequential_write(unsigned long num, int t)
 
     gettimeofday(&tv_begin, NULL);
     printf("-------------------sequential write, write size = %dKB------------------\n", t*4);
-
-    lseek(fd, 0, SEEK_SET);
-    returnCode = write(fd, buffer, num*size);  // num * block
-
-    if(returnCode < 0)
+    for(i = 0; i < num; i++)
     {
-        printf("ERROR:write /mnt/ssd/test.data fail, PAGE_SIZE= %ld", size);
-        exit(1);
+        lseek(fd, 0, SEEK_SET);
+        returnCode = write(fd, buffer, size);  // num * block
+
+        if(returnCode < 0)
+        {
+            printf("ERROR:write /mnt/ssd/test.data fail, PAGE_SIZE= %ld", size);
+            exit(1);
+        }
     }
 
     gettimeofday(&tv_end, NULL);
