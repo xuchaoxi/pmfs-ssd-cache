@@ -50,11 +50,10 @@ void random_write(unsigned long num, int t)
     double bandWidth;
     int returnCode;
 
-    init(t);
-    fd = open("/mnt/ssd/test.data", O_RDWR | O_CREAT | O_DIRECT, 0666);
+    fd = open("/mnt/ssd/iotest", O_RDWR | O_CREAT | O_DIRECT, 0666);
     if(fd < 0)
     {
-        perror("cann't open /mnt/ssd/test.data");
+        perror("cann't open /mnt/ssd/iotest");
         exit(1);
     }
 
@@ -70,7 +69,7 @@ void random_write(unsigned long num, int t)
 
         if(returnCode < 0)
         {
-            printf("ERROR:write /mnt/ssd/test.data fail offset= %ld, PAGE_SIZE= %d", off_num*size, size);
+            printf("ERROR:write /mnt/ssd/iotest fail offset= %ld, PAGE_SIZE= %d", off_num*size, size);
             exit(1);
         }
     }
@@ -80,6 +79,7 @@ void random_write(unsigned long num, int t)
     printf("totle time = %lf s, bandwidth = %lf MB\n", totle_time, bandWidth);
     printf("-------------------------------end!-----------------------------------\n\n");
     close(fd);
+ //   system("rm -f /mnt/ssd/iotest");
 }
 
 void sequential_write(unsigned long num, int t)
@@ -90,10 +90,10 @@ void sequential_write(unsigned long num, int t)
     double bandWidth;
     int returnCode;
 
-    fd = open("/mnt/ssd/test.data", O_RDWR | O_CREAT | O_DIRECT, 0666);
+    fd = open("/mnt/ssd/iotest", O_RDWR | O_CREAT | O_DIRECT, 0666);
     if(fd < 0)
     {
-        perror("cann't open /mnt/ssd/test.data");
+        perror("cann't open /mnt/ssd/iotest");
         exit(1);
     }
     gettimeofday(&tv_begin, NULL);
@@ -102,10 +102,11 @@ void sequential_write(unsigned long num, int t)
     for(i = 0; i < num; i++)
     {
         returnCode = write(fd, buffer, size);  // num * block
-
+        if(i%1000000==0)
+            printf("%ld\n", i);
         if(returnCode < 0)
         {
-            printf("ERROR:write /mnt/ssd/test.data fail, PAGE_SIZE= %ld", size);
+            printf("ERROR:write /mnt/ssd/iotest fail, PAGE_SIZE= %ld\n", size);
             exit(1);
         }
     }
@@ -116,12 +117,15 @@ void sequential_write(unsigned long num, int t)
     printf("totle time = %lf s, bandwidth = %lf MB\n", totle_time, bandWidth);
     printf("-------------------------------end!-----------------------------------\n\n");
     close(fd);
+ //   system("rm -f /mnt/ssd/iotest");
 }
+
 int main()
 {
     int i;
     for(i = 0; i < 8; i++)
     {
+        init(write_magnification[i]);
         random_write((unsigned long)SSD_BUFFER_SIZE / (unsigned long)(page_size*write_magnification[i]), write_magnification[i]);
     sequential_write((unsigned long)SSD_BUFFER_SIZE / (unsigned long)(page_size*write_magnification[i]),write_magnification[i]);
     }
