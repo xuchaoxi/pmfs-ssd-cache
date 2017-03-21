@@ -59,7 +59,7 @@ void random_write(unsigned long num)
         }
     }
     gettimeofday(&tv_end, NULL);
-    totle_time = (tv_end.tv_usec - tv_begin.tv_usec) / 1000.0 + (tv_end.tv_sec - tv_begin.tv_sec);
+    totle_time = (tv_end.tv_usec - tv_begin.tv_usec) / 1000000.0 + (tv_end.tv_sec - tv_begin.tv_sec);
     bandWidth = (num * PAGE_SIZE) / (1024 * 1024) / totle_time;
     printf("totle time = %lf, bandwidth = %lf\n", totle_time, bandWidth);
     printf("------------------------end!------------------------\n");
