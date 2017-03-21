@@ -19,11 +19,11 @@
 
 unsigned int write_magnification[] = {1,2,4,8,16,32,64,128};  // 4KB, 8KB, 16KB. 32KB, 64KB, 128KB, 256KB, 512KB
 unsigned long page_size = 4096;  // 4KB
-unsigned long size;
+unsigned long size;  // write size per time
 
 
-char* buffer;
-int fd;
+char* buffer;  // buffer
+int fd;       // file descriptor
 
 void init(int t)
 {
@@ -51,13 +51,23 @@ void random_write(unsigned long num, int t)
     int returnCode;
 
     init(t);
+    fd = open("/mnt/ssd/test.data", O_RDWR | O_CREAT | O_DIRECT, 0666);
+    if(fd < 0)
+    {
+        perror("cann't open /mnt/ssd/test.data");
+        exit(1);
+    }
 
     gettimeofday(&tv_begin, NULL);
     printf("-------------------randdom write, write size = %dKB----------------------\n", t*4);
+
+    srand((unsigned)time(NULL));
     for(i = 0; i < num; i++)
     {
         off_num = rand() % ((unsigned long)SSD_BUFFER_SIZE / (unsigned long)size / 20); // %(1GB/PAGE_SIZE)
+
         returnCode = pwrite(fd, buffer, size, off_num*size);
+
         if(returnCode < 0)
         {
             printf("ERROR:write /mnt/ssd/test.data fail offset= %ld, PAGE_SIZE= %d", off_num*size, size);
@@ -69,6 +79,7 @@ void random_write(unsigned long num, int t)
     bandWidth = (num * size) / (1024 * 1024) / totle_time;
     printf("totle time = %lf s, bandwidth = %lf MB\n", totle_time, bandWidth);
     printf("-------------------------------end!-----------------------------------\n\n");
+    close(fd);
 }
 
 void sequential_write(unsigned long num, int t)
@@ -79,11 +90,17 @@ void sequential_write(unsigned long num, int t)
     double bandWidth;
     int returnCode;
 
+    fd = open("/mnt/ssd/test.data", O_RDWR | O_CREAT | O_DIRECT, 0666);
+    if(fd < 0)
+    {
+        perror("cann't open /mnt/ssd/test.data");
+        exit(1);
+    }
     gettimeofday(&tv_begin, NULL);
     printf("-------------------sequential write, write size = %dKB------------------\n", t*4);
+   
     for(i = 0; i < num; i++)
     {
-        lseek(fd, 0, SEEK_SET);
         returnCode = write(fd, buffer, size);  // num * block
 
         if(returnCode < 0)
@@ -98,22 +115,16 @@ void sequential_write(unsigned long num, int t)
     bandWidth = (num * size) / (1024 * 1024) / totle_time;
     printf("totle time = %lf s, bandwidth = %lf MB\n", totle_time, bandWidth);
     printf("-------------------------------end!-----------------------------------\n\n");
+    close(fd);
 }
 int main()
 {
     int i;
-    fd = open("/mnt/ssd/test.data", O_RDWR | O_CREAT | O_DIRECT, 0666);
-    if(fd < 0)
-    {
-        perror("cann't open /mnt/ssd/test.data");
-        exit(1);
-    }
     for(i = 0; i < 8; i++)
     {
         random_write((unsigned long)SSD_BUFFER_SIZE / (unsigned long)(page_size*write_magnification[i]), write_magnification[i]);
     sequential_write((unsigned long)SSD_BUFFER_SIZE / (unsigned long)(page_size*write_magnification[i]),write_magnification[i]);
     }
-    close(fd);
     return 0;
 }
 
