@@ -16,8 +16,10 @@
 #include<sys/stat.h>
 
 #define SSD_BUFFER_SIZE 20*1024*1024*1024   // 20GB
+#define OFF_SET 30*1024*1024*1024  // 30GB
 
-unsigned int write_magnification[] = {1,2,4,8,16,32,64,128};  // 4KB, 8KB, 16KB. 32KB, 64KB, 128KB, 256KB, 512KB
+
+unsigned int write_magnification[] = {1,2,4,8,16,32,64,128,256,512,1024};  // 4KB, 8KB, 16KB. 32KB, 64KB, 128KB, 256KB, 512KB,1MB,2MB,4MB
 unsigned long page_size = 4096;  // 4KB
 unsigned long size;  // write size per time
 
@@ -31,7 +33,8 @@ void init(int t)
     size = page_size * t;
     // allocate 
     // void* memalign(size_t boundary, size_t size)
-    buffer = (char*)memalign(512, size);
+//    buffer = (char*)memalign(512, size);
+    buffer = (char*)valloc(size);
     if(!buffer) {
         printf("Fail to allocate write buffer\n");
         exit(1);
@@ -63,7 +66,7 @@ void random_write(unsigned long num, int t)
     srand((unsigned)time(NULL));
     for(i = 0; i < num; i++)
     {
-        off_num = rand() % ((unsigned long)SSD_BUFFER_SIZE / (unsigned long)size / 20); // %(1GB/PAGE_SIZE)
+        off_num = rand() % ((unsigned long)OFF_SET / (unsigned long)size ); // %(1GB/PAGE_SIZE)  // 30GB
 
         returnCode = pwrite(fd, buffer, size, off_num*size);
 
@@ -102,8 +105,6 @@ void sequential_write(unsigned long num, int t)
     for(i = 0; i < num; i++)
     {
         returnCode = write(fd, buffer, size);  // num * block
-        if(i%1000000==0)
-            printf("%ld\n", i);
         if(returnCode < 0)
         {
             printf("ERROR:write /mnt/ssd/iotest fail, PAGE_SIZE= %ld\n", size);
@@ -123,9 +124,11 @@ void sequential_write(unsigned long num, int t)
 int main()
 {
     int i;
-    for(i = 0; i < 8; i++)
+    for(i = 0; i < 3; i++)
     {
+        printf("begin\n");
         init(write_magnification[i]);
+        printf("end\n");
         random_write((unsigned long)SSD_BUFFER_SIZE / (unsigned long)(page_size*write_magnification[i]), write_magnification[i]);
     sequential_write((unsigned long)SSD_BUFFER_SIZE / (unsigned long)(page_size*write_magnification[i]),write_magnification[i]);
     }
