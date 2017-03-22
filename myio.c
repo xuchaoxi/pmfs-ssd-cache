@@ -20,8 +20,9 @@
 
 
 unsigned int write_magnification[] = {1,2,4,8,16,32,64,128,256,512,1024};  // 4KB, 8KB, 16KB. 32KB, 64KB, 128KB, 256KB, 512KB,1MB,2MB,4MB
+const char tmp[] = {'0','1','2','3','4','5','6','7','8','9','10','11','12','\0'};
 unsigned long page_size = 4096;  // 4KB
-unsigned long size;  // write size per time
+unsigned long write_size;  // write size per time
 
 
 char* buffer;  // buffer
@@ -30,18 +31,21 @@ int fd;       // file descriptor
 void init(int t)
 {
     long i;
-    size = page_size * t;
+    write_size = page_size * write_magnification[t];
     // allocate 
-    // void* memalign(size_t boundary, size_t size)
-//    buffer = (char*)memalign(512, size);
-    buffer = (char*)valloc(size);
+  //  if(t >= 3)
+    //    void* memalign(size_t boundary, size_t size)
+//        buffer = (char*)memalign(512, write_size);
+   // else
+//    buffer = (char*)malloc(write_size);   
+    buffer = (char*)valloc(write_size);
     if(!buffer) {
         printf("Fail to allocate write buffer\n");
         exit(1);
     }
-    for(i = 0; i < size; i++)
+    for(i = 0; i < write_size; i++)
     {
-        buffer[i] = '.';
+        buffer[i] = tmp[t];
     }
 }
 
@@ -61,24 +65,25 @@ void random_write(unsigned long num, int t)
     }
 
     gettimeofday(&tv_begin, NULL);
-    printf("-------------------randdom write, write size = %dKB----------------------\n", t*4);
+    printf("-------------------randdom write, write size = %dKB----------------------\n", write_magnification[t]*4);
 
     srand((unsigned)time(NULL));
     for(i = 0; i < num; i++)
     {
-        off_num = rand() % ((unsigned long)OFF_SET / (unsigned long)size ); // %(1GB/PAGE_SIZE)  // 30GB
+        off_num = rand() % ((unsigned long)OFF_SET / page_size); // %(1GB/PAGE_SIZE)  // 30GB
 
-        returnCode = pwrite(fd, buffer, size, off_num*size);
+//	printf("off_num = %ld\n", off_num);
+        returnCode = pwrite(fd, buffer, write_size, off_num*page_size);
 
         if(returnCode < 0)
         {
-            printf("ERROR:write /mnt/ssd/iotest fail offset= %ld, PAGE_SIZE= %d", off_num*size, size);
+            printf("ERROR:write /mnt/ssd/iotest fail offset= %ld, PAGE_SIZE= %d", off_num*write_size, write_size);
             exit(1);
         }
     }
     gettimeofday(&tv_end, NULL);
     totle_time = (tv_end.tv_usec - tv_begin.tv_usec) / 1000000.0 + (tv_end.tv_sec - tv_begin.tv_sec);
-    bandWidth = (num * size) / (1024 * 1024) / totle_time;
+    bandWidth = (num * write_size) / (1024 * 1024) / totle_time;
     printf("totle time = %lf s, bandwidth = %lf MB\n", totle_time, bandWidth);
     printf("-------------------------------end!-----------------------------------\n\n");
     close(fd);
@@ -93,28 +98,28 @@ void sequential_write(unsigned long num, int t)
     double bandWidth;
     int returnCode;
 
-    fd = open("/mnt/ssd/iotest", O_RDWR | O_CREAT | O_DIRECT, 0666);
+    fd = open("/mnt/ssd/iotest", O_RDWR | O_CREAT | O_DIRECT , 0666);
     if(fd < 0)
     {
         perror("cann't open /mnt/ssd/iotest");
         exit(1);
     }
     gettimeofday(&tv_begin, NULL);
-    printf("-------------------sequential write, write size = %dKB------------------\n", t*4);
+    printf("-------------------sequential write, write size = %dKB------------------\n", write_magnification[t]*4);
    
     for(i = 0; i < num; i++)
     {
-        returnCode = write(fd, buffer, size);  // num * block
+        returnCode = write(fd, buffer, write_size);  // num * block
         if(returnCode < 0)
         {
-            printf("ERROR:write /mnt/ssd/iotest fail, PAGE_SIZE= %ld\n", size);
+            printf("ERROR:write /mnt/ssd/iotest fail, PAGE_SIZE= %ld\n", write_size);
             exit(1);
         }
     }
 
     gettimeofday(&tv_end, NULL);
     totle_time = (tv_end.tv_usec - tv_begin.tv_usec) / 1000000.0 + (tv_end.tv_sec - tv_begin.tv_sec);
-    bandWidth = (num * size) / (1024 * 1024) / totle_time;
+    bandWidth = (num * write_size) / (1024 * 1024) / totle_time;
     printf("totle time = %lf s, bandwidth = %lf MB\n", totle_time, bandWidth);
     printf("-------------------------------end!-----------------------------------\n\n");
     close(fd);
@@ -124,13 +129,11 @@ void sequential_write(unsigned long num, int t)
 int main()
 {
     int i;
-    for(i = 0; i < 3; i++)
+    for(i = 0; i < 10; i++)
     {
-        printf("begin\n");
-        init(write_magnification[i]);
-        printf("end\n");
-        random_write((unsigned long)SSD_BUFFER_SIZE / (unsigned long)(page_size*write_magnification[i]), write_magnification[i]);
-    sequential_write((unsigned long)SSD_BUFFER_SIZE / (unsigned long)(page_size*write_magnification[i]),write_magnification[i]);
+        init(i);
+        random_write((unsigned long)SSD_BUFFER_SIZE / (unsigned long)(write_size), i);
+        sequential_write((unsigned long)SSD_BUFFER_SIZE / (unsigned long)(write_size), i);
     }
     return 0;
 }
