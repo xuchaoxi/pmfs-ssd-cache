@@ -16,7 +16,7 @@
 #include<sys/stat.h>
 
 #define SSD_BUFFER_SIZE 20*1024*1024*1024   // 20GB
-#define OFF_SET 30*1024*1024*1024  // 30GB
+#define OFF_SET 50*1024*1024*1024  // 100GB
 
 
 unsigned int write_magnification[] = {1,2,4,8,16,32,64,128,256,512,1024};  // 4KB, 8KB, 16KB. 32KB, 64KB, 128KB, 256KB, 512KB,1MB,2MB,4MB
@@ -51,16 +51,17 @@ void init(int t)
 
 void random_write(unsigned long num, int t)
 {
-    unsigned long i, off_num;
+    unsigned long i;
+    off_t off_num;
     struct timeval tv_begin, tv_end;
     double totle_time;
     double bandWidth;
     int returnCode;
 
-    fd = open("/mnt/ssd/iotest", O_RDWR | O_CREAT | O_DIRECT, 0666);
+    fd = open("/mnt/ssd/write", O_RDWR | O_CREAT | O_DIRECT, 0666);
     if(fd < 0)
     {
-        perror("cann't open /mnt/ssd/iotest");
+        perror("[ERROR]:Cann't open /mnt/ssd/write");
         exit(1);
     }
 
@@ -77,14 +78,14 @@ void random_write(unsigned long num, int t)
 
         if(returnCode < 0)
         {
-            printf("ERROR:write /mnt/ssd/iotest fail offset= %ld, PAGE_SIZE= %d", off_num*write_size, write_size);
+            printf("[ERROR]:write /mnt/ssd/write fail offset= %ld, PAGE_SIZE= %d\n", off_num*write_size, write_size);
             exit(1);
         }
     }
     gettimeofday(&tv_end, NULL);
     totle_time = (tv_end.tv_usec - tv_begin.tv_usec) / 1000000.0 + (tv_end.tv_sec - tv_begin.tv_sec);
     bandWidth = (num * write_size) / (1024 * 1024) / totle_time;
-    printf("totle time = %lf s, bandwidth = %lf MB\n", totle_time, bandWidth);
+    printf("totle time = %lf s, bandwidth = %lf MB/s\n", totle_time, bandWidth);
     printf("-------------------------------end!-----------------------------------\n\n");
     close(fd);
  //   system("rm -f /mnt/ssd/iotest");
@@ -98,10 +99,10 @@ void sequential_write(unsigned long num, int t)
     double bandWidth;
     int returnCode;
 
-    fd = open("/mnt/ssd/iotest", O_RDWR | O_CREAT | O_DIRECT , 0666);
+    fd = open("/mnt/ssd/write", O_RDWR | O_CREAT | O_DIRECT , 0666);
     if(fd < 0)
     {
-        perror("cann't open /mnt/ssd/iotest");
+        perror("cann't open /mnt/ssd/write");
         exit(1);
     }
     gettimeofday(&tv_begin, NULL);
@@ -112,7 +113,7 @@ void sequential_write(unsigned long num, int t)
         returnCode = write(fd, buffer, write_size);  // num * block
         if(returnCode < 0)
         {
-            printf("ERROR:write /mnt/ssd/iotest fail, PAGE_SIZE= %ld\n", write_size);
+            printf("ERROR:write /mnt/ssd/write fail, PAGE_SIZE= %ld\n", write_size);
             exit(1);
         }
     }
@@ -120,7 +121,7 @@ void sequential_write(unsigned long num, int t)
     gettimeofday(&tv_end, NULL);
     totle_time = (tv_end.tv_usec - tv_begin.tv_usec) / 1000000.0 + (tv_end.tv_sec - tv_begin.tv_sec);
     bandWidth = (num * write_size) / (1024 * 1024) / totle_time;
-    printf("totle time = %lf s, bandwidth = %lf MB\n", totle_time, bandWidth);
+    printf("totle time = %lf s, bandwidth = %lf MB/s\n", totle_time, bandWidth);
     printf("-------------------------------end!-----------------------------------\n\n");
     close(fd);
  //   system("rm -f /mnt/ssd/iotest");
@@ -132,8 +133,9 @@ int main()
     for(i = 0; i < 10; i++)
     {
         init(i);
-        random_write((unsigned long)SSD_BUFFER_SIZE / (unsigned long)(write_size), i);
-        sequential_write((unsigned long)SSD_BUFFER_SIZE / (unsigned long)(write_size), i);
+        unsigned long num = (unsigned long)SSD_BUFFER_SIZE / write_size;
+//        random_write(num, i);
+        sequential_write(num, i);
     }
     return 0;
 }
