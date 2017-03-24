@@ -16,7 +16,7 @@
 #include<sys/stat.h>
 
 #define SSD_BUFFER_SIZE 20*1024*1024*1024   // 20GB
-#define OFF_SET 50*1024*1024*1024  // 100GB
+#define OFF_SET 10*1024*1024*1024  // 100GB
 
 
 unsigned int write_magnification[] = {1,2,4,8,16,32,64,128,256,512,1024};  // 4KB, 8KB, 16KB. 32KB, 64KB, 128KB, 256KB, 512KB,1MB,2MB,4MB
@@ -32,11 +32,8 @@ void init(int t)
 {
     long i;
     write_size = page_size * write_magnification[t];
-    // allocate 
-  //  if(t >= 3)
     //    void* memalign(size_t boundary, size_t size)
 //        buffer = (char*)memalign(512, write_size);
-   // else
 //    buffer = (char*)malloc(write_size);   
     buffer = (char*)valloc(write_size);
     if(!buffer) {
@@ -134,8 +131,8 @@ int main()
     {
         init(i);
         unsigned long num = (unsigned long)SSD_BUFFER_SIZE / write_size;
-//        random_write(num, i);
-        sequential_write(num, i);
+        random_write(num, i);
+//        sequential_write(num, i);
     }
     return 0;
 }

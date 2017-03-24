@@ -37,8 +37,17 @@ void init()
     }
 } 
 
-void read_before_write()
+void read_before_write(int N, )
 {
+    char* zone_buffer;
+    int fd;
+    zone_buffer = (char*)valloc(ZONE_SIZE);
+    if(!zone_buffer)
+    {
+        perror("[ERROR]:Fail to allocate zone buffer");
+        exit(0);
+    }
+
 
 }
 
