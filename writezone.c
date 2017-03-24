@@ -15,7 +15,7 @@
 #include<sys/file.h>
 #include<sys/stat.h>
 
-#define PAGE_SIZE 4096
+#define PAGE_SIZE 4096  // 4KB
 #define ZONE_SIZE 1048576  // 1MB=1024*1024
 #define SSD_BUFFER_SIZE 20*1024*1024*1024 // 20GB
 #define WRITE_BUFFER_SIZE 10*1024*1024*1024 // for how many to write
@@ -25,7 +25,7 @@ char* buffer;
 void init()
 {
     int i ;
-    buffer = (char*)valloc(PAGE_SIZE);
+    buffer = (char*)valloc(PAGE_SIZE);  // buffer = 4KB 
     if(!buffer) 
     {
         perror("[ERROR]:Fail to allocate write buffer");
@@ -50,7 +50,8 @@ void direct_write(int N, unsigned long num)
     double bandWidth;
     int returnCode;
     off_t offset_zone, offset_fd, cur_offset_fd; // offset in zone and offset in fd 
-    int n, m;
+    int n;
+    unsigned long m;
 
     fd = open("/mnt/ssd/iotest", O_CREAT | O_RDWR | O_DIRECT, 0666);
     if(fd < 0)
@@ -62,15 +63,15 @@ void direct_write(int N, unsigned long num)
     printf("----------------------------begin direct write-------------------------------\n");
     gettimeofday(&tv_begin);
 
-    for(m = 0; m < num;m++)
+    for(m = 0; m < num;m++)  // total write num*N*4KB
     {
         offset_fd = rand() % ((unsigned long)SSD_BUFFER_SIZE / PAGE_SIZE); // randdom offset in 20GB 
         cur_offset_fd = lseek(fd, offset_fd*PAGE_SIZE , SEEK_SET);  // move fd from SEEK_SET to offset
-//        srand(time(NULL));
+        srand(time(NULL));
         for(n = 0; n < N; n++)  //  N * PAGE_SIZE
         {   
-            offset_zone =  rand() % ((unsigned long)ZONE_SIZE); // randwrite offset   
-            returnCode = pwrite(fd, buffer, PAGE_SIZE, offset_zone);  // randdom write PAGE_SIZE(4KB) in the zone
+            offset_zone =  rand() % ((unsigned long)ZONE_SIZE/PAGE_SIZE); // randwrite offset  ?PAGE_SIZE 
+            returnCode = pwrite(fd, buffer, PAGE_SIZE, offset_zone*PAGE_SIZE);  // randdom write PAGE_SIZE(4KB) in the zone
             if(returnCode < 0)
             {
                 perror("[ERROR]: Randdom write zone fail");
