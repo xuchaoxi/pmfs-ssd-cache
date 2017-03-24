@@ -53,10 +53,10 @@ void direct_write(int N, unsigned long num)
     int n;
     unsigned long m;
 
-    fd = open("/mnt/ssd/iotest", O_CREAT | O_RDWR | O_DIRECT, 0666);
+    fd = open("/mnt/ssd/write", O_CREAT | O_RDWR | O_DIRECT, 0666);
     if(fd < 0)
     {
-        perror("[ERROR]:Cannot open file /mnt/ssd/iotest");
+        perror("[ERROR]:Cannot open file /mnt/ssd/write");
         exit(0);
     }
     srand(time(NULL));
@@ -65,12 +65,17 @@ void direct_write(int N, unsigned long num)
 
     for(m = 0; m < num;m++)  // total write num*N*4KB
     {
-        offset_fd = rand() % ((unsigned long)SSD_BUFFER_SIZE / PAGE_SIZE); // randdom offset in 20GB 
+        offset_fd = rand() % ((unsigned long)SSD_BUFFER_SIZE / PAGE_SIZE); // fd randdom offset in 20GB 
         cur_offset_fd = lseek(fd, offset_fd*PAGE_SIZE , SEEK_SET);  // move fd from SEEK_SET to offset
+        if(cur_offset_fd==-1)
+        {
+            perror("[ERROR]:lseek");
+            exit(1);
+        }
         srand(time(NULL));
         for(n = 0; n < N; n++)  //  N * PAGE_SIZE
         {   
-            offset_zone =  rand() % ((unsigned long)ZONE_SIZE/PAGE_SIZE); // randwrite offset  ?PAGE_SIZE 
+            offset_zone =  rand() % ((unsigned long)ZONE_SIZE/PAGE_SIZE); // write offset=1MB  ?/PAGE_SIZE  
             returnCode = pwrite(fd, buffer, PAGE_SIZE, offset_zone*PAGE_SIZE);  // randdom write PAGE_SIZE(4KB) in the zone
             if(returnCode < 0)
             {
@@ -81,7 +86,7 @@ void direct_write(int N, unsigned long num)
     }
     gettimeofday(&tv_end);
     total_time = (tv_end.tv_usec - tv_begin.tv_usec)/1000000.0 + tv_end.tv_sec - tv_begin.tv_sec;
-    bandWidth = WRITE_BUFFER_SIZE / (1024*1024) / total_time;
+    bandWidth = (unsigned long)WRITE_BUFFER_SIZE / (1024*1024) / total_time;
     printf("total_time = %lf s, bandWidth = %lf MB/s\n", total_time, bandWidth);
     printf("------------------------------end!----------------------------------------\n\n");
     close(fd);
