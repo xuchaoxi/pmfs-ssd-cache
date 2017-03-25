@@ -16,7 +16,7 @@
 #include<sys/stat.h>
 
 #define SSD_BUFFER_SIZE 20*1024*1024*1024   // 20GB
-#define OFF_SET 10*1024*1024*1024  // 100GB
+#define OFF_SET 100*1024*1024  // 100GB
 
 
 unsigned int write_magnification[] = {1,2,4,8,16,32,64,128,256,512,1024};  // 4KB, 8KB, 16KB. 32KB, 64KB, 128KB, 256KB, 512KB,1MB,2MB,4MB
@@ -133,6 +133,8 @@ int main()
         unsigned long num = (unsigned long)SSD_BUFFER_SIZE / write_size;
         random_write(num, i);
 //        sequential_write(num, i);
+                   
+        
     }
     return 0;
 }
