@@ -108,7 +108,7 @@ void direct_write(int N, unsigned long num)
         exit(0);
     }
     srand(time(NULL));
-    printf("----------------------------begin direct write-------------------------------\n");
+    printf("-----------------------begin direct write, N=%d-----------------------------\n", N);
     gettimeofday(&tv_begin);
 
     for(m = 0; m < num;m++)  // total write num*N*4KB
@@ -143,10 +143,14 @@ void direct_write(int N, unsigned long num)
 int main(int argc, char* argv[])
 {
     int N = 64;  // N*4KB in a zone
-    unsigned long num = (unsigned long) WRITE_BUFFER_SIZE / (N*4*1024);  // how many times to write
+ //   unsigned long num = (unsigned long) WRITE_BUFFER_SIZE / (N*4*1024);  // how many times to write
     init();
-//    direct_write(N, num);
-    unsigned long num2 = (unsigned long) WRITE_BUFFER_SIZE / ZONE_SIZE;
-    read_before_write(N, num2);
+    for(N = 1;N < 1024; N *= 2)
+    {
+        unsigned long num = (unsigned long) WRITE_BUFFER_SIZE / (N*4*1024);
+        direct_write(N, num);
+    }
+//    unsigned long num2 = (unsigned long) WRITE_BUFFER_SIZE / ZONE_SIZE;
+//    read_before_write(N, num2);
     return 0;
 }
