@@ -16,7 +16,7 @@
 #include<sys/stat.h>
 
 #define PAGE_SIZE 4096  // 4KB
-#define ZONE_SIZE 3145728  // 1MB=1024*1024=1048576 2MB=2097152 3MB=3145728 
+#define ZONE_SIZE 1048576  // 1MB=1024*1024=1048576 2MB=2097152 3MB=3145728 
 #define SSD_BUFFER_SIZE 50*1024*1024*1024 // 20GB
 #define WRITE_BUFFER_SIZE 10*1024*1024*1024 // for how many to write
 
@@ -125,8 +125,8 @@ void direct_write(int N, unsigned long num)
  //       srand(time(NULL));
         for(n = 0; n < N; n++)  //  N * PAGE_SIZE
         {   
- //           offset_zone =  rand() % ((unsigned long)ZONE_SIZE/PAGE_SIZE); // write offset=1MB  ?/PAGE_SIZE  
-  //          returnCode = pwrite(fd, buffer, PAGE_SIZE, offset_zone*PAGE_SIZE);  // randdom write PAGE_SIZE(4KB) in the zone
+            offset_zone =  rand() % ((unsigned long)ZONE_SIZE/PAGE_SIZE); // write offset=1MB  ?/PAGE_SIZE  
+            returnCode = pwrite(fd, buffer, PAGE_SIZE, offset_zone*PAGE_SIZE);  // randdom write PAGE_SIZE(4KB) in the zone
             returnCode = write(fd, buffer, PAGE_SIZE);
             if(returnCode < 0)
             {
@@ -149,11 +149,11 @@ int main(int argc, char* argv[])
  //   unsigned long num = (unsigned long) WRITE_BUFFER_SIZE / (N*4*1024);  // how many times to write
     init();
     unsigned long num2 = (unsigned long) WRITE_BUFFER_SIZE / ZONE_SIZE;
-    for(N = 1;N <= 2048; N *= 2)
+    for(N = 1;N < 128; N *= 2)
     {
- //       unsigned long num = (unsigned long) WRITE_BUFFER_SIZE / (N*4*1024);
-   //     direct_write(N, num);
-        read_before_write(N, num2);
+        unsigned long num = (unsigned long) WRITE_BUFFER_SIZE / (N*4*1024);
+        direct_write(N, num);
+   //     read_before_write(N, num2);
     }
     return 0;
 }
