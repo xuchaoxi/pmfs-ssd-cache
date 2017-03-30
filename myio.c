@@ -16,10 +16,10 @@
 #include<sys/stat.h>
 
 #define SSD_BUFFER_SIZE 20*1024*1024*1024   // 20GB
-#define OFF_SET 70*1024*1024*1024  // 100GB
+#define OFF_SET 200*1024*1024*1024  // 100GB
 
 
-unsigned int write_magnification[] = {1,2,4,8,16,32,64,128,256,512,1024};  // 4KB, 8KB, 16KB. 32KB, 64KB, 128KB, 256KB, 512KB,1MB,2MB,4MB
+unsigned int write_magnification[] = {1,2,4,8,16,32,64,128,256,512,1024,2048,4096,8192};  // 4KB, 8KB, 16KB. 32KB, 64KB, 128KB, 256KB, 512KB,1MB,2MB,4MB,8MB,16MB,32MB
 const char tmp[] = {'0','1','2','3','4','5','6','7','8','9','10','11','12','\0'};
 unsigned long page_size = 4096;  // 4KB
 unsigned long write_size;  // write size per time
@@ -127,12 +127,12 @@ void sequential_write(unsigned long num, int t)
 int main()
 {
     int i;
-    for(i = 0; i < 10; i++)
+    for(i = 13; i < 14; i++)
     {
         init(i);
         unsigned long num = (unsigned long)SSD_BUFFER_SIZE / write_size;
         random_write(num, i);
-//        sequential_write(num, i);
+ //       sequential_write(num, i);
                    
         
     }

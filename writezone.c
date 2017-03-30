@@ -17,8 +17,8 @@
 
 #define PAGE_SIZE 4096  // 4KB
 #define ZONE_SIZE 1048576  // 1MB=1024*1024=1048576 2MB=2097152 3MB=3145728 
-#define SSD_BUFFER_SIZE 50*1024*1024*1024 // 20GB
-#define WRITE_BUFFER_SIZE 10*1024*1024*1024 // for how many to write
+#define SSD_BUFFER_SIZE 200*1024*1024*1024 // 200GB
+#define WRITE_BUFFER_SIZE 2*1024*1024*1024 // for how many to write
 
 char* buffer;
 
@@ -71,11 +71,12 @@ void read_before_write(int N, unsigned long num)
             perror("[ERROR]:Fail to read buffer");
             exit(0);
         }
-       for(n = 0;n < N*4096;n++)
+        /*
+        for(n = 0;n < N*4096;n++)
         {
             zone_buffer[n]++;
         }
-
+*/
         returnCode = pwrite(fd, zone_buffer, ZONE_SIZE, offset_fd*PAGE_SIZE);
         if(returnCode < 0)
         {
@@ -134,10 +135,12 @@ void direct_write(int N, unsigned long num)
                 exit(0);
             }
         }
+n = 1;
     }
     gettimeofday(&tv_end);
     total_time = (tv_end.tv_usec - tv_begin.tv_usec)/1000000.0 + tv_end.tv_sec - tv_begin.tv_sec;
     bandWidth = (unsigned long)WRITE_BUFFER_SIZE / (1024*1024) / total_time;
+n = 1;
     printf("total_time = %lf s, bandWidth = %lf MB/s\n", total_time, bandWidth);
     printf("------------------------------end!----------------------------------------\n\n");
     close(fd);
@@ -148,12 +151,12 @@ int main(int argc, char* argv[])
     int N = 64;  // N*4KB in a zone
  //   unsigned long num = (unsigned long) WRITE_BUFFER_SIZE / (N*4*1024);  // how many times to write
     init();
-    unsigned long num2 = (unsigned long) WRITE_BUFFER_SIZE / ZONE_SIZE;
-    for(N = 1;N < 128; N *= 2)
+ //   unsigned long num2 = (unsigned long) WRITE_BUFFER_SIZE / ZONE_SIZE;
+    for(N = 1;N < 2048; N *= 2)
     {
         unsigned long num = (unsigned long) WRITE_BUFFER_SIZE / (N*4*1024);
         direct_write(N, num);
-   //     read_before_write(N, num2);
+    //    read_before_write(N, num2);
     }
     return 0;
 }
