@@ -41,6 +41,18 @@ typedef struct  {
     Raid_Virtual_Addr *next;  // next block;
 } Raid_Virtual_Addr;
 
+void initGlobalVirtualAddr();
+
+void initRaidVirtualAddr();
+
+
+
+extern long GBLKNUM;  // Global block numbers
+extern long RBLKNUM;  // Raid block numbers
+extern long BLKSIZE;  // block size
+extern Global_Virtual_Addr *global_block_addr;
+extern Raid_Virtual_Addr *raid_virtual_addr;
+
 
 
 
