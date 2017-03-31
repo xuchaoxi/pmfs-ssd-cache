@@ -15,63 +15,83 @@
 #include<sys/file.h>
 #include "raid-5.h"
 
-void initGlobalVirtualAddr()
-{
-}
-
-void initRaidVirtualAddr()
-{
-}
-
-void initBLKBuffer()
+void initPageBuffer()
 {
     int i;
-    block_buf = (char*)memalign(512, BLKSIZE);
-    if(!block_buf)
+//    page_buf = (char*)memalign(2, PAGESIZE);
+    page_buf = (char*)valloc(PAGESIZE);
+    if(!page_buf)
     {
-        perror("[ERROR]:Fail to allocate blcok buffer");
+        perror("[ERROR]:Fail to allocate page buffer");
         exit(0);
     }
-    for(i = 0;i < BLKSIZE;++i)
-        block_buf[i] = '.';
+    for(i = 0;i < PAGESIZE;++i)
+        page_buf[i] = '.';
 }
 
-// param : id the Nth 4KB
+// param : page_id is the Nth 4KB
 void execute(long page_id)
 {   
     // the Nth block in the global virtual address
     global_block_id = (long)( page_id / PAGENUM);  
+
+    // page offset in a block
+    page_off = page_id % PAGENUM;
     
     // the Nth stripe
-    global_stripe_id = (long)(global_block_id / 4); 
+    global_stripe_id = (long)(global_block_id / N); 
     
     // the block offset in a stripe at global address
-    block_offset_stripe = global_block_id - global_stripe_id*4;  
+    block_offset_stripe = global_block_id - global_stripe_id*N;  
     
     // the parity block in Nth ssd
-    parity_ssd_id = (global_stripe_id / rotate_width) % 5; 
+    parity_ssd_id = (global_stripe_id / rotate_width) % (N+1); 
     
     // the data block in Nth ssd
     data_ssd_id = (block_offset_stripe >= parity_ssd_id) ? block_offset_stripe+1 : block_offset_stripe;
-    printf("parity_ssd_id = %d\tblock_ssd_id = %d\tstripe_id = %d\n\n", parity_ssd_id, data_ssd_id, global_stripe_id);
+//    printf("parity_ssd_id = %d data_ssd_id = %d stripe_id = %d\n", parity_ssd_id, data_ssd_id, global_stripe_id);
     
 }
 
-void writeBlock()
+void writePage()
 {
-    //ssd_path[7] = data_ssd_id+'0';
-    ssd_path[8] = data_ssd_id+'1';
+    switch(data_ssd_id)
+    {
+        case 0 : 
+            {
+                ssd_path = "/dev/sdb1";
+                break;
+            }
+        case 1 : 
+            {
+                ssd_path = "/dev/sdb2";
+                break;
+            }
+        case 2 : 
+            {
+                ssd_path = "/dev/sdb3";
+                break;
+            }
+        case 3 : 
+            {
+                ssd_path = "/dev/sdb5";
+                break;
+            }
+        case 4 : 
+            {
+                ssd_path = "/dev/sdb6";
+                break;
+            }
+    }
     int ssdfd = open(ssd_path, O_RDWR | O_DIRECT);
     if(ssdfd < 0)
     {
         perror("[ERROR]:Fail to open ssd device");
         exit(0);
     }
-    initBLKBuffer();
-    off_t offset = global_stripe_id;
- //   int code = pwrite(ssdfd, block_buf, BLKSIZE, offset);   
-//    int code = write(ssdfd, block_buf, 512);
-    int code = 1;
+    initPageBuffer();
+    off_t write_off = global_stripe_id*PAGENUM +  page_off;
+    int code = pwrite(ssdfd, page_buf, PAGESIZE, write_off*4096);   
     if(code < 0)
     {
         perror("[ERROR]:Fail to write block buffer");
