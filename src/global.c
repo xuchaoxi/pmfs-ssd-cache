@@ -10,14 +10,16 @@
 long GBLKNUM;  // global block numbers
 long RBLKNUM;  // raid block numbers
 size_t BLKSIZE = 524288;  //128*4096;  // block size;
+size_t PAGESIZE = 4096;  // page size
 long rotate_width = 100; // rotate width for stripe
 
-char ssd_path[10] = "/dev/sdb1"; 
+char *ssd_path; 
 
 int data_ssd_id;
 int parity_ssd_id;
 int block_offset_stripe;
 long global_stripe_id;
 long global_block_id; 
-char *block_buf;
+int page_off;
+char *page_buf;
 
