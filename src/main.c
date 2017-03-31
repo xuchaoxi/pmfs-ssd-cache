@@ -5,6 +5,8 @@
 	> Created Time: Fri 31 Mar 2017 11:15:59 AM CST
  ************************************************************************/
 
+#define _GNU_SOURCE 1
+
 #include<stdio.h>
 #include"raid-5.h"
 
