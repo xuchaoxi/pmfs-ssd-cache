@@ -42,7 +42,7 @@ void execute(long page_id)
     global_stripe_id = (long)(global_block_id / N); 
     
     // the block offset in a stripe at global address
-    block_offset_stripe = global_block_id - global_stripe_id*N;  
+    block_offset_stripe = global_block_id % N;  
     
     // the parity block in Nth ssd
     parity_ssd_id = (global_stripe_id / rotate_width) % (N+1); 
@@ -53,9 +53,9 @@ void execute(long page_id)
     
 }
 
-void writePage()
+void writeOrReadPage(int ssd_id, int flag)
 {
-    switch(data_ssd_id)
+    switch(ssd_id)
     {
         case 0 : 
             {
@@ -83,21 +83,24 @@ void writePage()
                 break;
             }
     }
-    int ssdfd = open(ssd_path, O_RDWR | O_DIRECT);
+    int ssdfd = open(ssd_path, O_WRONLY | O_DIRECT);
     if(ssdfd < 0)
     {
         perror("[ERROR]:Fail to open ssd device");
         exit(0);
     }
 //    initPageBuffer();
-    off_t write_off = global_stripe_id*PAGENUM +  page_off;
-    int code = pwrite(ssdfd, page_buf, PAGESIZE, write_off*4096);   
+    off_t offset = global_stripe_id*PAGENUM +  page_off;
+    int code;
+    if(flag==0)
+        code = pwrite(ssdfd, page_buf, PAGESIZE, offset*PAGESIZE);   
+    else if(flag==1)
+        code = pread(ssdfd, page_buf, PAGENUM, offset*PAGESIZE);
     if(code < 0)
     {
-        perror("[ERROR]:Fail to write block buffer");
+        perror("[ERROR]:Fail to write or read page buffer");
         exit(0);
     }
     close(ssdfd);
 }
-
 

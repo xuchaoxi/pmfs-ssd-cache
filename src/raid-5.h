@@ -12,7 +12,7 @@
 
 void initPageBuffer();
 void execute(long pageid);
-void writePage();
+void writeOrReadPage(int ssd_id, int flag);
 
 extern long GBLKNUM;  // Global block numbers
 extern long RBLKNUM;  // Raid block numbers
