@@ -89,7 +89,7 @@ void writePage()
         perror("[ERROR]:Fail to open ssd device");
         exit(0);
     }
-    initPageBuffer();
+//    initPageBuffer();
     off_t write_off = global_stripe_id*PAGENUM +  page_off;
     int code = pwrite(ssdfd, page_buf, PAGESIZE, write_off*4096);   
     if(code < 0)
