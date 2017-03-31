@@ -57,31 +57,16 @@ void writeOrReadPage(int ssd_id, int flag)
 {
     switch(ssd_id)
     {
-        case 0 : 
-            {
-                ssd_path = "/dev/sdb1";
-                break;
-            }
-        case 1 : 
-            {
-                ssd_path = "/dev/sdb2";
-                break;
-            }
-        case 2 : 
-            {
-                ssd_path = "/dev/sdb3";
-                break;
-            }
-        case 3 : 
-            {
-                ssd_path = "/dev/sdb5";
-                break;
-            }
-        case 4 : 
-            {
-                ssd_path = "/dev/sdb6";
-                break;
-            }
+        case 0 : ssd_path = "/dev/sdb1";
+                 break;
+        case 1 : ssd_path = "/dev/sdb2";
+                 break;
+        case 2 : ssd_path = "/dev/sdb3";
+                 break;
+        case 3 : ssd_path = "/dev/sdb5";
+                 break;
+        case 4 : ssd_path = "/dev/sdb6";
+                 break;
     }
     int ssdfd = open(ssd_path, O_WRONLY | O_DIRECT);
     if(ssdfd < 0)
@@ -104,3 +89,21 @@ void writeOrReadPage(int ssd_id, int flag)
     close(ssdfd);
 }
 
+
+void directWrite(long pageid)
+{
+    ssd_path = "/dev/sdb1";
+    int fd = open(ssd_path, O_WRONLY | O_DIRECT);
+    if(fd < 0)
+    {
+        perror("[ERROR]:Fail to open /dev/sdb1");
+        exit(0);
+    }
+    int ret = pwrite(fd, page_buf, PAGESIZE, pageid*PAGESIZE);
+    if(ret < 0)
+    {
+        perror("[ERROR]:Fail to write page buffer in ssd1");
+        exit(0);
+    }
+    close(fd);
+}

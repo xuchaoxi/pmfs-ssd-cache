@@ -25,10 +25,12 @@ int main()
     {
         if(i%1000000==0)
         {
-            printf("%d %d %ld\n",con, rw,id);
+            printf("%d %d %ld\n", con, rw, id);
             i = 0;
         }
         ++i;
+        directWrite(id);
+/*
         execute(id);
         if(rw==0)
         {
@@ -39,6 +41,7 @@ int main()
         {
             writeOrReadPage(data_ssd_id, 1);
         }
+*/
     }
     gettimeofday(&tv_end, NULL);
     total_time = (tv_end.tv_usec - tv_begin.tv_usec)/1000000.0+(tv_end.tv_sec - tv_begin.tv_sec);
