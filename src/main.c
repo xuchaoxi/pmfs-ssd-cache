@@ -14,10 +14,12 @@ int main()
 {
     int con, rw;
     long id;
-//    rotate_width = 10;
+    
     while(scanf("%d %d %ld", &con, &rw, &id)!=EOF)
     {
         execute(id);
+        writeBlock();
+        printf("%s\n", ssd_path);
     }
     return 0;
 }
