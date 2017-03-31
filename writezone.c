@@ -128,7 +128,6 @@ void direct_write(int N, unsigned long num)
         {   
             offset_zone =  rand() % ((unsigned long)ZONE_SIZE/PAGE_SIZE); // write offset=1MB  ?/PAGE_SIZE  
             returnCode = pwrite(fd, buffer, PAGE_SIZE, offset_zone*PAGE_SIZE);  // randdom write PAGE_SIZE(4KB) in the zone
-            returnCode = write(fd, buffer, PAGE_SIZE);
             if(returnCode < 0)
             {
                 perror("[ERROR]: Randdom write zone fail");
