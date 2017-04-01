@@ -37,6 +37,10 @@ extern NVMBufferControl *nvm_buffer_control;
 extern unsigned long hit_num;
 extern unsigned long flush_nvm_blocks;
 
+extern unsigned long NNVMBuffers;
+extern void initNVMBuffer();
+
+
 
 
 
