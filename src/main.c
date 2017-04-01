@@ -23,7 +23,7 @@ int main()
     gettimeofday(&tv_begin, NULL);
     while(scanf("%d %d %ld", &con, &rw, &id)!=EOF)
     {
-        if(i%1000000==0)
+      //  if(i%1000000==0)
         {
             printf("%d %d %ld\n", con, rw, id);
             i = 0;
