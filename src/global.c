@@ -7,8 +7,6 @@
 
 #include "raid-5.h"
 
-long GBLKNUM;  // global block numbers
-long RBLKNUM;  // raid block numbers
 size_t BLKSIZE = 524288;  //128*4096;  // block size;
 size_t PAGESIZE = 4096;  // page size
 long rotate_width = 100; // rotate width for stripe

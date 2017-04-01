@@ -15,8 +15,6 @@ void execute(long pageid);
 void writeOrReadPage(int ssd_id, int flag);
 void directWrite(long pageid);
 
-extern long GBLKNUM;  // Global block numbers
-extern long RBLKNUM;  // Raid block numbers
 extern size_t BLKSIZE;  // block size 128 * 4096
 extern size_t PAGESIZE; // page size 4096
 extern long rotate_width;  // rotate width for stripeu
