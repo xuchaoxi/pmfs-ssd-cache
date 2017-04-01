@@ -7,7 +7,6 @@
 
 #ifndef _SSD-CACHE_H
 #define _SSD-CACHE_H
-#endif
 
 typedef struct {
     off_t offset;
@@ -26,3 +25,4 @@ typedef struct {
     struct SSDBuferHashBucket *next_item;
 }SSDBufferHashBucket;
 
+#endif
