@@ -7,6 +7,8 @@
 
 #include<stdio.h>
 #include<stdlib.h>
+#include "nvm-cache.h"
+#include "nvm-buf-table.h"
 
 void initNVMBuffer()
 {
@@ -26,5 +28,25 @@ void initNVMBuffer()
     hit_num = 0;
     flush_nvm_blocks = 0;
 }
+
+NVMBufferDesc *NVMBufferAlloc(NVMBufferTag nvm_buf_tag, bool &found)
+{
+    NVMBufferDesc *nvm_buf_hdr;
+    unsigned long nvm_buf_hash = nvmBufferTableHashCode(
+}
+    
+
+void read_block(off_t offset, char* nvm_buffer)
+{
+    void *nvm_buf_block;
+    NVMBufferDesc *nvm_buf_hdr;
+
+    bool found = 0;
+    int ret;
+    if(DEBUG)
+        printf("[INFO]:read() ------ offset=%lu\n",offset);
+    nvm_buf_hdr = NVMBufferAlloc(offset, &found);
+}
+
 
 

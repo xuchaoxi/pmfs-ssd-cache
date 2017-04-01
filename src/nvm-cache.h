@@ -8,37 +8,56 @@
 #ifndef _NVM-CACHE_H
 #define _NVM-CACHE_H
 
+
 typedef struct
 {
-    off_t nvm_buf_tag;  // nvm bufffer offset
+    off_t offset;  // offset at ssd
+    int ssd_id;  // at which ssd
+} NVMBufferTag;
+
+typedef struct
+{
+    NVMBufferTag nvm_buf_tag;  // 
     long nvm_buf_id;  
     unsigned nvm_buf_flag;  // ?
     long next_freenvm;     // to link next free nvm
 } NVMBufferDesc;
 
 
+
 typedef struct NVMBufferHashBucket
 {
-    off_t hash_key;
-    long nvm_buf_id;
-    struct NVMBufferHashBucket *next_item;
-}
+    NVMBufferTag hash_key;  // 
+    long nvm_buf_id;  // id at nvm 
+    int ssd_id;  // belong to which ssd
+    struct NVMBufferHashBucket *next;
+} NVMBufferHashBuck;
 
 typedef struct
 {
     long n_usednvm;  // to evict
     long first_freenvm;  // head of free nvm list
     long last_freenvm;  // tail of free nvm list
-}NVMBufferControl;
+} NVMBufferControl;
 
 extern NVMBufferDesc *nvm_buffer_descriptors;  // describe nvm addr
 extern NVMBufferHashBucket *nvm_buffer_hashtable;
 extern NVMBufferControl *nvm_buffer_control;
+
 extern unsigned long hit_num;
 extern unsigned long flush_nvm_blocks;
 
-extern unsigned long NNVMBuffers;
+extern unsigned long NNVMBuffers;   // 50000
+extern unsigned long NNVMBufTables;  // 500000
+extern size_t NVM_BUFFER_SIZE; // 4096(4KB)
+
+#define GetNVMBufHashBucket(hash_code) ((NVMBufferHashBucket*) nvm_buffer_hashtable + (unsigned)hash_code) 
+
 extern void initNVMBuffer();
+extern void read_block(off_t offset, char* nvm_buffer);
+extern void write_block(off_t offset, char* nvm_buffer);
+
+
 
 
 

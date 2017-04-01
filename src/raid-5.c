@@ -30,16 +30,19 @@ void initPageBuffer()
 }
 
 // param : page_id is the Nth 4KB
-void execute(long page_id)
+void execute(off_t offset)
 {   
     // the Nth block in the global virtual address
-    global_block_id = (long)( page_id / PAGENUM);  
+    global_block_id = (long)( offset / PAGENUM);  
 
     // page offset in a block
-    page_off = page_id % PAGENUM;
+    page_off = offset % PAGENUM;
     
     // the Nth stripe
     global_stripe_id = (long)(global_block_id / N); 
+
+    // offset at Nth ssd
+    ssd_page_off = global_stripe_id * PAGENUM + page_off;
     
     // the block offset in a stripe at global address
     block_offset_stripe = global_block_id % N;  

@@ -6,6 +6,7 @@
  ************************************************************************/
 
 #include "raid-5.h"
+#include "nvm-cache.h"
 
 size_t BLKSIZE = 524288;  //128*4096;  // block size;
 size_t PAGESIZE = 4096;  // page size
@@ -18,6 +19,11 @@ int parity_ssd_id;
 int block_offset_stripe;
 long global_stripe_id;
 long global_block_id; 
-int page_off;
+size_t page_off;
+size_t ssd_page_off; 
+
 char *page_buf;
+
+
+unsigned long NNVMBuffers = 500000;
 
