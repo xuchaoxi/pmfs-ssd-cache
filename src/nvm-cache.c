@@ -12,7 +12,7 @@
 
 void initNVMBuffer()
 {
-    nvm_buffer_descriptors = (NVMBufferDesc*)malloc(sizeof(NVMBufferDesc)*NNMVBuffers);
+    nvm_buffer_descriptors = (NVMBufferDesc*)malloc(sizeof(NVMBufferDesc)*NNVMBuffers);
     NVMBufferDesc *nvm_buf_hdr;
     long i;
     nvm_buf_hdr = nvm_buffer_descriptors;
@@ -29,10 +29,12 @@ void initNVMBuffer()
     flush_nvm_blocks = 0;
 }
 
-NVMBufferDesc *NVMBufferAlloc(NVMBufferTag nvm_buf_tag, bool &found)
+NVMBufferDesc *NVMBufferAlloc(NVMBufferTag nvm_buf_tag, bool *found)
 {
     NVMBufferDesc *nvm_buf_hdr;
-    unsigned long nvm_buf_hash = nvmBufferTableHashCode(
+    unsigned long nvm_buf_hash = nvmBufferTableHashCode(&nvm_buf_tag);
+    long ssd_buf_id = nvmBufferTableLookup(&nvm_buf_tag, nvm_buf_hash);
+    
 }
     
 
@@ -45,7 +47,7 @@ void read_block(off_t offset, char* nvm_buffer)
     int ret;
     if(DEBUG)
         printf("[INFO]:read() ------ offset=%lu\n",offset);
-    nvm_buf_hdr = NVMBufferAlloc(offset, &found);
+//    nvm_buf_hdr = NVMBufferAlloc(, &found);
 }
 
 
