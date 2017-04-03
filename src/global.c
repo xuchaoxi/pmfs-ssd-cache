@@ -21,6 +21,7 @@ long global_stripe_id;
 long global_block_id; 
 size_t page_off;
 size_t ssd_page_off; 
+long raid_offset;
 
 char *page_buf;
 
