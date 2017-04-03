@@ -8,11 +8,12 @@
 #ifndef _NVM-CACHE_H
 #define _NVM-CACHE_H
 
+#define DEBUG 0
 
 typedef struct
 {
     off_t offset;  // offset at ssd
-    int ssd_id;  // at which ssd
+  //  int ssd_id;  // at which ssd
 } NVMBufferTag;
 
 typedef struct
@@ -27,11 +28,11 @@ typedef struct
 
 typedef struct NVMBufferHashBucket
 {
-    NVMBufferTag hash_key;  // 
+    NVMBufferTag hash_key;  //
     long nvm_buf_id;  // id at nvm 
-    int ssd_id;  // belong to which ssd
+  //  int ssd_id;  // belong to which ssd
     struct NVMBufferHashBucket *next;
-} NVMBufferHashBuck;
+} NVMBufferHashBucket;
 
 typedef struct
 {
@@ -51,7 +52,7 @@ extern unsigned long NNVMBuffers;   // 50000
 extern unsigned long NNVMBufTables;  // 500000
 extern size_t NVM_BUFFER_SIZE; // 4096(4KB)
 
-#define GetNVMBufHashBucket(hash_code) ((NVMBufferHashBucket*) nvm_buffer_hashtable + (unsigned)hash_code) 
+#define GetNVMBufHashBucket(hash_code) ((NVMBufferHashBucket*) (nvm_buffer_hashtable + (unsigned)hash_code) 
 
 extern void initNVMBuffer();
 extern void read_block(off_t offset, char* nvm_buffer);
