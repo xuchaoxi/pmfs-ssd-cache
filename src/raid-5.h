@@ -26,6 +26,7 @@ extern long global_stripe_id; // the Nth stripe
 extern long global_block_id; // the Nth block in the global virtual address
 extern size_t page_off; // page offset in a block
 extern size_t ssd_page_off; // page offset at Nth ssd
+extern long raid_offset; // offset in the raid-5 address
 
 extern char *ssd_path; // ssd path
 extern char *page_buf; // page buffer
