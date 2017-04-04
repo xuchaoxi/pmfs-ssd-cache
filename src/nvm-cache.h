@@ -10,6 +10,11 @@
 
 #define DEBUG 0
 
+#define NVM_BUF_VALID 0x01
+#define NVM_BUF_DIRTY 0x02
+
+#define bool unsigned char
+
 typedef struct
 {
     off_t offset;  // offset at ssd
@@ -24,7 +29,10 @@ typedef struct
     long next_freenvm;     // to link next free nvm
 } NVMBufferDesc;
 
-
+typedef enum {
+    ClOCK = 0,
+    LRU
+}NVMEvictionStrategy;
 
 typedef struct NVMBufferHashBucket
 {
@@ -59,7 +67,9 @@ extern void read_block(off_t offset, char* nvm_buffer);
 extern void write_block(off_t offset, char* nvm_buffer);
 
 
+extern NVMEvictionStrategy EvictStrategy;
 
+extern int nvm_fd;
 
 
 

@@ -7,8 +7,10 @@
 
 #include<stdio.h>
 #include<stdlib.h>
+#include "raid-5.h"
 #include "nvm-cache.h"
 #include "nvm-buf-table.h"
+#include "strategy/lru.h"
 
 void initNVMBuffer()
 {
@@ -29,25 +31,78 @@ void initNVMBuffer()
     flush_nvm_blocks = 0;
 }
 
+static NVMBufferDesc *getNVMStrategyBuffer(NVMBufferTag nvm_buf_tag, NVMEvictionStrategy strategy)
+{
+    if(strategy==LRU)
+        return getLRUBuffer();
+}
+
+static void *hitInNVMBuffer(NVMBufferDesc *nvm_buf_hdr, NVMEvictionStrategy strategy)
+{
+    if(strategy==LRU)
+        hitInLRUBuffer(nvm_buf_hdr);
+}
+
 NVMBufferDesc *NVMBufferAlloc(NVMBufferTag nvm_buf_tag, bool *found)
 {
     NVMBufferDesc *nvm_buf_hdr;
     unsigned long nvm_buf_hash = nvmBufferTableHashCode(&nvm_buf_tag);
-    long ssd_buf_id = nvmBufferTableLookup(&nvm_buf_tag, nvm_buf_hash);
-    
+    long nvm_buf_id = nvmBufferTableLookup(&nvm_buf_tag, nvm_buf_hash);
+    if(nvm_buf_id > 0)
+    {
+        hit_num++;
+        *found = 1;
+        nvm_buf_hdr = &nvm_buffer_descriptors[nvm_buf_id];
+        hitInNVMBuffer(nvm_buf_hdr, EvictStrategy);
+        // stratege
+        return nvm_buf_hdr;
+    }
+
+    nvm_buf_hdr = getNVMStategyBuffer(nvm_buf_tag, EvictStrategy);
+    // else not hit
+    // getstratege
+    nvmBufferTableInsert(&nvm_buf_tag, nvm_buf_hash, nvm_buf_hdr->nvm_buf_id);
+    nvm_buf_hdr->nvm_buf_flag &= ~(NVM_BUF_VALID | NVM_BUF_DIRTY);
+    nvm_buf_hdr->nvm_buf_tag = nvm_buf_tag;
+    *found = 0;
+     return nvm_buf_hdr;   
 }
     
 
 void read_block(off_t offset, char* nvm_buffer)
 {
     void *nvm_buf_block;
-    NVMBufferDesc *nvm_buf_hdr;
-
     bool found = 0;
     int ret;
+
+    static NVMBufferDesc *nvm_buf_hdr;
+    static NVMBufferTag nvm_buf_tag;
+    nvm_buf_tag.offset = offset;
     if(DEBUG)
         printf("[INFO]:read() ------ offset=%lu\n",offset);
-//    nvm_buf_hdr = NVMBufferAlloc(, &found);
+    nvm_buf_hdr = NVMBufferAlloc(nvm_buf_tag, &found);
+    if(found==1)
+    {
+        // read 4KB
+        ret = pread(nvm_fd, nvm_buffer, NVM_BUFFER_SIZE, nvm_buf_hdr->nvm_buf_id);
+        if(ret < 0)
+        {
+            printf("[ERROR]:read_block()---read from nvm cache: nvm_fd=%d, errorcode=%d, offset=%lu\n", nvm_fd, ret, offset);
+            exit(0);
+        }
+    }
+    else {
+        // read 0
+        ret = writeOrReadPage(data_ssd_id, 0);
+//        ret = ssdread(ssd_fd, nvm_buffer, NVM_BUFFER_SIZE, offset);
+        if(ret < 0)
+        {
+            printf("[ERROR]:read_block()---read from ssd: ssd_fd = %d, errorcode=%d, offset=%lu\n", data_ssd_id, ret, offset);
+            exit(0);
+        }
+        nvm_buf_hdr->nvm_buf_flag &= ~NVM_BUF_VALID;
+        nvm_buf_hdr->nvm_buf_flag |= NVM_BUF_VALID;
+    }
 }
 
 
