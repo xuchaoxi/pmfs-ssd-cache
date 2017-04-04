@@ -33,3 +33,5 @@ NVMEvictionStrategy EvictStrategy = LRU;
 
 int nvm_fd;
 
+unsigned long flush_fifo_times;
+
