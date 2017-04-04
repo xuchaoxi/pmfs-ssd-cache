@@ -26,7 +26,8 @@ long raid_offset;
 char *page_buf;
 
 
-unsigned long NNVMBuffers = 500000;
+unsigned long NNVMBuffers = 50000;
+unsigned long NNVMBufferTables = 50000;
 
 NVMEvictionStrategy EvictStrategy = LRU;
 
