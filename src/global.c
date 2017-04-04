@@ -28,3 +28,7 @@ char *page_buf;
 
 unsigned long NNVMBuffers = 500000;
 
+NVMEvictionStrategy EvictStrategy = LRU;
+
+int nvm_fd;
+
