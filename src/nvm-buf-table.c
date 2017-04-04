@@ -47,8 +47,34 @@ size_t nvmBufferTableLookup(NVMBufferTag *tag, unsigned long hash_code)
     return -1;
 }
 
-long nvmBufferTableInsert(NVMBufferTag nvm_buf_tag, unsigned long hash_code, size_t nvm_buf_id)
+long nvmBufferTableInsert(NVMBufferTag *nvm_buf_tag, unsigned long hash_code, size_t nvm_buf_id)
 {
+    if(DEBUG)
+        printf("[INFO]:Insert buf_tag=%lu\n", nvm_buf_tag->offset);
+    NVMBufferHashBucket *nowbucket = GETNVMHashBucket(hash_code);
+    while(nowbucket->next!=NULL&&nowbucket!=NULL)
+    {
+        if(isSamebuf(nowbucket->hash_key, nvm_buf_tag))
+        {
+            return nowbucket->nvm_buf_id;
+        }
+        nowbucket = nowbuckey->next;
+    }
+    if(nowbucket!=NULL)
+    {
+        NVMBufferHashBucket *newbucket = (NVMBufferHashBucket*)malloc(sizeof(NVMBufferHashBucket));
+        newbucket->hash_key = *nvm_buf_id;
+        newbucket->nvm_buf_tag = nvm_buf_tag;
+        newbucket->next = NULL;
+        nowbucket->next = newbucket;
+    }
+    else {
+        nowbucket->nvm_buf_id = nvm_buf_id;
+        nowbucket->hash_key = *nvm_buf_tag;
+        nowbucket->next = NULL;
+    }
+    return -1;
+
 }
 
 long nvmBufferTableDelete(off_t nvm_buf_tag, unsigned long hash_code)
