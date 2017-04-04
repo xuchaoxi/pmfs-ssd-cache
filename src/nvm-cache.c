@@ -12,6 +12,11 @@
 #include "nvm-buf-table.h"
 #include "strategy/lru.h"
 
+static NVMBufferDesc *NVMBufferAlloc(NVMBufferTag nvm_buf_tag, bool *found);
+static void *initStrategyNVMBuffer(NVMEvictionStrategy strategy);
+static NVMBufferDesc *getNVMBufferStrategy(NVMBufferTag nvm_buf_tag, NVMEvictionStrategy strategy);
+static void *hitInNVMBuffer(NVMBufferDesc *nvm_buf_hdr, NVMEvictionStrategy strategy);
+
 void initNVMBuffer()
 {
     nvm_buffer_descriptors = (NVMBufferDesc*)malloc(sizeof(NVMBufferDesc)*NNVMBuffers);
@@ -31,6 +36,12 @@ void initNVMBuffer()
     flush_nvm_blocks = 0;
 }
 
+static void *initStrategyNVMBuffer(NVMEvictionStrategy strategy)
+{
+    if(strategy==LRU)
+        initNVMBufferForLRU();
+}
+
 static NVMBufferDesc *getNVMStrategyBuffer(NVMBufferTag nvm_buf_tag, NVMEvictionStrategy strategy)
 {
     if(strategy==LRU)
@@ -43,7 +54,7 @@ static void *hitInNVMBuffer(NVMBufferDesc *nvm_buf_hdr, NVMEvictionStrategy stra
         hitInLRUBuffer(nvm_buf_hdr);
 }
 
-NVMBufferDesc *NVMBufferAlloc(NVMBufferTag nvm_buf_tag, bool *found)
+static NVMBufferDesc *NVMBufferAlloc(NVMBufferTag nvm_buf_tag, bool *found)
 {
     NVMBufferDesc *nvm_buf_hdr;
     unsigned long nvm_buf_hash = nvmBufferTableHashCode(&nvm_buf_tag);
