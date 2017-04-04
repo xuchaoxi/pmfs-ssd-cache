@@ -57,7 +57,7 @@ extern unsigned long hit_num;
 extern unsigned long flush_nvm_blocks;
 
 extern unsigned long NNVMBuffers;   // 50000
-extern unsigned long NNVMBufTables;  // 500000
+extern unsigned long NNVMBufTables;  // 50000
 extern size_t NVM_BUFFER_SIZE; // 4096(4KB)
 
 #define GetNVMBufHashBucket(hash_code) ((NVMBufferHashBucket*) (nvm_buffer_hashtable + (unsigned)hash_code) 

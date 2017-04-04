@@ -19,6 +19,16 @@ static void *hitInNVMBuffer(NVMBufferDesc *nvm_buf_hdr, NVMEvictionStrategy stra
 
 void initNVMBuffer()
 {
+    // init buffer strategy
+    initStrategyNVMBuffer(EvictStrategy);
+    // init hash table
+    initNVMBufTable(NNVMBufTables);
+
+    nvm_buffer_control = (NVMBufferControl*)malloc(sizeof(NVMBufferControl));
+    nvm_buffer_control->n_usednvm = 0;
+    nvm_buffer_control->first_freenvm = 0;
+    nvm_buffer_control->last_freenvm = NNVMBuffers-1;
+
     nvm_buffer_descriptors = (NVMBufferDesc*)malloc(sizeof(NVMBufferDesc)*NNVMBuffers);
     NVMBufferDesc *nvm_buf_hdr;
     long i;
