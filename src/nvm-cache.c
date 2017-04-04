@@ -14,7 +14,7 @@
 
 static NVMBufferDesc *NVMBufferAlloc(NVMBufferTag nvm_buf_tag, bool *found);
 static void *initStrategyNVMBuffer(NVMEvictionStrategy strategy);
-static NVMBufferDesc *getNVMBufferStrategy(NVMBufferTag nvm_buf_tag, NVMEvictionStrategy strategy);
+static NVMBufferDesc *getNVMStrategyBuffer(NVMBufferTag nvm_buf_tag, NVMEvictionStrategy strategy);
 static void *hitInNVMBuffer(NVMBufferDesc *nvm_buf_hdr, NVMEvictionStrategy strategy);
 
 void initNVMBuffer()
@@ -88,7 +88,13 @@ static NVMBufferDesc *NVMBufferAlloc(NVMBufferTag nvm_buf_tag, bool *found)
     *found = 0;
      return nvm_buf_hdr;   
 }
+
+void *flushNVMBuffer(NVMBufferDesc *nvm_buf_hdr)
+{
+    char *nvm_buffer;
+    int ret;
     
+}
 
 void read_block(off_t offset, char* nvm_buffer)
 {
@@ -125,6 +131,8 @@ void read_block(off_t offset, char* nvm_buffer)
         nvm_buf_hdr->nvm_buf_flag |= NVM_BUF_VALID;
     }
 }
+
+
 
 
 
