@@ -57,7 +57,7 @@ void execute(off_t offset)
     raid_offset = (global_stripe_id*(N+1) + data_ssd_id)*PAGENUM + page_off;
 }
 
-void writeOrReadPage(int ssd_id, int flag)
+int writeOrReadPage(int ssd_id, int flag)
 {
     switch(ssd_id)
     {
@@ -81,16 +81,19 @@ void writeOrReadPage(int ssd_id, int flag)
 //    initPageBuffer();
     off_t offset = global_stripe_id*PAGENUM +  page_off;
     int code;
-    if(flag==0)
+    if(flag==1)
         code = pwrite(ssdfd, page_buf, PAGESIZE, offset*PAGESIZE);   
-    else if(flag==1)
+    else if(flag==0)
         code = pread(ssdfd, page_buf, PAGENUM, offset*PAGESIZE);
+/*
     if(code < 0)
     {
         perror("[ERROR]:Fail to write or read page buffer");
         exit(0);
     }
+*/
     close(ssdfd);
+    return code;
 }
 
 
