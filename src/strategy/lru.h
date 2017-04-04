@@ -23,8 +23,10 @@ typedef struct
     long last_lru;  // Tail of list of LRU
 } NVMBufferControlForLRU;
 
-NVMBufferDescForLRU *nvm_buffer_descriptor_lru;
+NVMBufferDescForLRU *nvm_buffer_descriptors_lru;
 NVMBufferControlForLRU *nvm_buffer_control_lru;
+
+extern unsigned long flush_fifo_times;
 
 extern void initSSDBufferForLRU();
 extern void *hitInLRUBuffer(NVMBufferDesc *nvm_buf_hdr);
