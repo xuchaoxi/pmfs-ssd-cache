@@ -10,7 +10,7 @@
 #include "nvm-cache.h"
 #include "raid-5.h"
 
-//static bool isSamebuf(NVMBufferTag *, NVMBufferTag *);
+static bool isSamebuf(NVMBufferTag *, NVMBufferTag *);
 
 void initNVMBufferTable(size_t size)
 {
@@ -47,7 +47,7 @@ size_t nvmBufferTableLookup(NVMBufferTag *tag, unsigned long hash_code)
     return -1;
 }
 
-long nvmBufferTableInsert(off_t nvm_buf_tag, unsigned long hash_code, size_t nvm_buf_id)
+long nvmBufferTableInsert(NVMBufferTag nvm_buf_tag, unsigned long hash_code, size_t nvm_buf_id)
 {
 }
 
@@ -55,9 +55,9 @@ long nvmBufferTableDelete(off_t nvm_buf_tag, unsigned long hash_code)
 {
 }
 
-/*
+
 static bool isSamebuf(NVMBufferTag *tag1, NVMBufferTag *tag2)
 {
     return (tag1->offset==tag2->offset);
 }
-*/
+
