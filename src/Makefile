@@ -4,7 +4,7 @@ CC = cc -g
 
 CFLAGS += -Wall
 
-OBJS = main.o raid-5.o global.o
+OBJS = main.o raid-5.o global.o nvm-buf-table.o
 
 #all: $(OBJS) build
 #	@echo 'Bulid Successfully'
@@ -19,6 +19,9 @@ raid-5.o: raid-5.c
 	$(CC) $(CFLAGS) -c $?
 
 global.o: global.c
+	$(CC) $(CFLAGS) -c $?
+
+nvm-buf-table.o: nvm-buf-table.c
 	$(CC) $(CFLAGS) -c $?
 
 .PHONY:clean
