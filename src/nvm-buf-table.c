@@ -54,17 +54,17 @@ long nvmBufferTableInsert(NVMBufferTag *nvm_buf_tag, unsigned long hash_code, si
     NVMBufferHashBucket *nowbucket = GETNVMHashBucket(hash_code);
     while(nowbucket->next!=NULL&&nowbucket!=NULL)
     {
-        if(isSamebuf(nowbucket->hash_key, nvm_buf_tag))
+        if(isSamebuf(&nowbucket->hash_key, nvm_buf_tag))
         {
             return nowbucket->nvm_buf_id;
         }
-        nowbucket = nowbuckey->next;
+        nowbucket = nowbucket->next;
     }
     if(nowbucket!=NULL)
     {
         NVMBufferHashBucket *newbucket = (NVMBufferHashBucket*)malloc(sizeof(NVMBufferHashBucket));
-        newbucket->hash_key = *nvm_buf_id;
-        newbucket->nvm_buf_tag = nvm_buf_tag;
+        newbucket->hash_key = *nvm_buf_tag;
+        newbucket->nvm_buf_id = nvm_buf_id;
         newbucket->next = NULL;
         nowbucket->next = newbucket;
     }
@@ -77,8 +77,38 @@ long nvmBufferTableInsert(NVMBufferTag *nvm_buf_tag, unsigned long hash_code, si
 
 }
 
-long nvmBufferTableDelete(off_t nvm_buf_tag, unsigned long hash_code)
+long nvmBufferTableDelete(NVMBufferTag *nvm_buf_tag, unsigned long hash_code)
 {
+    if(DEBUG)
+        printf("[INFO]:Delet buf_tag=%lu\n",nvm_buf_tag->offset);
+    NVMBufferHashBucket *nowbucket = GETNVMHashBucket(hash_code);
+    long del_id;
+    NVMBufferHashBucket *delitem;
+    while(nowbucket->next!=NULL && nowbucket!=NULL)
+    {
+        if(isSamebuf(&nowbucket->next->hash_key, nvm_buf_tag))
+        {
+            del_id = nowbucket->next->nvm_buf_id;
+            break;
+        }
+        nowbucket = nowbucket->next;
+    }
+    if(isSamebuf(&nowbucket->hash_key, nvm_buf_tag))
+        del_id = nowbucket->nvm_buf_id;
+    if(nowbucket->next!=NULL)
+    {
+        delitem = nowbucket->next;
+        nowbucket->next = nowbucket->next->next;
+        free(delitem);
+        return del_id;
+    }
+    else {
+        delitem = nowbucket->next;
+        nowbucket->next = NULL;
+        free(delitem);
+        return del_id;
+    }
+    return -1;
 }
 
 
