@@ -2,7 +2,12 @@
 
 CC = cc -g
 
+ifndef NVM_SSD_CACHE_DIR
+NVM_SSD_CACHE_DIR = .
+endif
+
 CFLAGS += -Wall
+CPPFLAGS += -I$(NVM_SSD_CACHE_DIR) -I$(NVM_SSD_CACHE_DIR)/strategy
 
 OBJS = main.o raid-5.o global.o nvm-buf-table.o
 
