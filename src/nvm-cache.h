@@ -17,14 +17,14 @@
 
 typedef struct
 {
-    off_t offset;  // offset at ssd
+    off_t offset;  // offset at global ssd
   //  int ssd_id;  // at which ssd
 } NVMBufferTag;
 
 typedef struct
 {
     NVMBufferTag nvm_buf_tag;  // 
-    long nvm_buf_id;  
+    long nvm_buf_id;       // buffer id
     unsigned nvm_buf_flag;  // ?
     long next_freenvm;     // to link next free nvm
 } NVMBufferDesc;
