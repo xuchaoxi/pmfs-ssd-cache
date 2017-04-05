@@ -115,6 +115,7 @@ void read_block(off_t offset, char* nvm_buffer)
         if(ret < 0)
         {
             printf("[ERROR]:read_block()---read from nvm cache: nvm_fd=%d, errorcode=%d, offset=%lu\n", nvm_fd, ret, offset);
+            perror("[ERROR]");
             exit(0);
         }
     }
@@ -125,14 +126,40 @@ void read_block(off_t offset, char* nvm_buffer)
         if(ret < 0)
         {
             printf("[ERROR]:read_block()---read from ssd: ssd_fd = %d, errorcode=%d, offset=%lu\n", data_ssd_id, ret, offset);
+            perror("[ERROR]");
             exit(0);
         }
+        flush_nvm_blocks++;
         nvm_buf_hdr->nvm_buf_flag &= ~NVM_BUF_VALID;
         nvm_buf_hdr->nvm_buf_flag |= NVM_BUF_VALID;
     }
 }
 
+void write_block(off_t offset, char *nvm_buffer)
+{
+  //  void *nvm_buf_block;
+    bool found;
+    int ret;
 
+    static NVMBufferTag nvm_buf_tag;
+    static NVMBufferDesc *nvm_buf_hdr;
+    nvm_buf_tag.offset = offset;
+    if(DEBUG)
+        printf("[INFO] write()----offset=%lu\n", offset);
+    nvm_buf_hdr = NVMBufferAlloc(nvm_buf_tag, &found);
+    flush_nvm_blocks++;
+    if(flush_nvm_blocks%10000==0)
+        printf("hit num:%lu  flush_nvm_blocks:%lu flush_fifo_blocks:\n", hit_num, flush_nvm_blocks);
+    ret = pwrite(nvm_fd, nvm_buffer, NVM_BUFFER_SIZE, nvm_buf_hdr->nvm_buf_id*NVM_BUFFER_SIZE);
+    if(ret < 0)
+    {
+        printf("[ERROR]: nvm_fd=%d, errorcode=%d, offset=%lu\n", nvm_fd, ret, offset);
+        perror("[ERROR]");
+        exit(0);
+    }
+    nvm_buf_hdr->nvm_buf_flag |= NVM_BUF_VALID | NVM_BUF_DIRTY;
+}
+    
 
 
 
