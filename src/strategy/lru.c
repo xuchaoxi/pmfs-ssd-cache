@@ -36,10 +36,37 @@ void initSSDBufferForLRU()
 
 static volatile void *addToLRUHead(NVMBufferDescForLRU *nvm_buf_hdr_lru)
 {
+    if(nvm_buffer_control->n_usednvm==0)
+    {
+        nvm_buffer_control_lru->first_lru = nvm_buf_hdr_lru->nvm_buf_id;
+        nvm_buffer_control_lru->last_lru = nvm_buf_hdr_lru->nvm_buf_id;
+    }
+    else {
+       nvm_buf_hdr_lru->next_lru = nvm_buffer_descriptors_lru[nvm_buffer_control_lru->first_lru].nvm_buf_id;
+       nvm_buf_hdr_lru->last_lru = -1;
+       nvm_buffer_descriptors_lru[nvm_buffer_control_lru->first_lru].last_lru = nvm_buf_hdr_lru->nvm_buf_id;
+    nvm_buffer_control_lru->last_lru = nvm_buf_hdr_lru->nvm_buf_id;
+    }
+    return NULL;
+
 }
 
 static volatile void *deleteFromLRU(NVMBufferDescForLRU *nvm_buf_hdr_lru)
 {
+    if(nvm_buf_hdr_lru->last_lru >= 0)
+    {
+        nvm_buffer_descriptors_lru[nvm_buf_hdr_lru->last_lru].next_lru = nvm_buf_hdr_lru->next_lru;
+    }
+    else {
+        nvm_buffer_control_lru->first_lru = nvm_buf_hdr_lru->next_lru;
+    }
+    if(nvm_buf_hdr_lru->next_lru >= 0)
+    {
+        nvm_buffer_descriptors_lru[nvm_buf_hdr_lru->next_lru].last_lru = nvm_buf_hdr_lru->last_lru;
+    }
+    else {
+        nvm_buffer_control_lru->last_lru = nvm_buf_hdr_lru->last_lru;
+    }
 }
 
 static volatile void *moveToLRUHead(NVMBufferDescForLRU *nvm_buf_hdr_lru)

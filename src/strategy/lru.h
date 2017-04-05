@@ -13,8 +13,8 @@
 typedef struct 
 {
     long nvm_buf_id; // nvm buffer location in shared buffer
-    long next_lru;  // to link used nvm as LRU
-    long last_lru;  
+    long next_lru;  // to link next used nvm as LRU
+    long last_lru;  // to link pre used nvm as LRU
 } NVMBufferDescForLRU;
 
 typedef struct
