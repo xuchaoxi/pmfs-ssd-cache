@@ -94,6 +94,30 @@ void *flushNVMBuffer(NVMBufferDesc *nvm_buf_hdr)
     char *nvm_buffer;
     int ret;
     
+    // page
+    ret = posix_memalign(&nvm_buffer, 512, sizeof(char)*PAGESIZE);
+    if(ret < 0)
+    {
+        perror("[ERROR]:flushNVMBuffer()------posix_memalign");
+        free(nvm_buffer);
+        exit(0);
+    }
+    ret = pread(nvm_fd, nvm_buffer, NVM_BUFFER_SIZE, nvm_buf_hdr->nvm_buf_id*NVM_BUFFER_SIZE);
+    if(ret < 0)
+    {
+        perror("[ERROR]:");
+        printf("flushNVMBuffer():---- read from NVM: nvm_fd=%d, errorcode=%d, offset=%lu\n", nvm_fd, ret, nvm_buf_hdr->nvm_buf_id*NVM_BUFFER_SIZE);
+        exit(0);
+    }
+    ret = writeOrReadPage(data_sdd_id, 1);
+    if(ret < 0)
+    {
+        perror("[ERROR]:");
+        printf("flushNVMBuffer()------write to ssd: fd=%d, errorcode=%d, offset=%lu\n",data_ssd_id, ret, nvm_buf_hdr->nvm_buf_tag.offset);
+        exit(0);
+    }
+    free(nvm_buffer);
+    return NULL;
 }
 
 void read_block(off_t offset, char* nvm_buffer)
