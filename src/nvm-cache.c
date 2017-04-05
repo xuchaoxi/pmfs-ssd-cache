@@ -109,7 +109,7 @@ void *flushNVMBuffer(NVMBufferDesc *nvm_buf_hdr)
         printf("flushNVMBuffer():---- read from NVM: nvm_fd=%d, errorcode=%d, offset=%lu\n", nvm_fd, ret, nvm_buf_hdr->nvm_buf_id*NVM_BUFFER_SIZE);
         exit(0);
     }
-    ret = writeOrReadPage(data_sdd_id, 1);
+    ret = writeOrReadPage(data_ssd_id, 1);
     if(ret < 0)
     {
         perror("[ERROR]:");
