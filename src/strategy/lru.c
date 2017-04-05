@@ -78,7 +78,40 @@ static volatile void *moveToLRUHead(NVMBufferDescForLRU *nvm_buf_hdr_lru)
 
 NVMBufferDesc *getLRUBuffer()
 {
+    NVMBufferDesc *nvm_buf_hdr;
+    NVMBufferDescForLRU *nvm_buf_hdr_lru;
+    if(nvm_buffer_control->first_freenvm>=0)
+    {
+        nvm_buf_hdr = &nvm_buffer_descriptors[nvm_buffer_control->first_freenvm];
+        nvm_buf_hdr_lru = &nvm_buffer_descriptors_lru[nvm_buffer_control->first_freenvm];
+        nvm_buffer_control->first_freenvm = nvm_buf_hdr->next_freenvm;
+        nvm_buf_hdr->next_freenvm = -1;
+        addToLRUHead(nvm_buf_hdr_lru);
+        nvm_buffer_control->n_usednvm++;
+        return nvm_buf_hdr;
+    }
+    flush_fifo_times++;
+    nvm_buf_hdr = &nvm_buffer_descriptors[nvm_buffer_control_lru->last_lru];
+    nvm_buf_hdr_lru = &nvm_buffer_descriptors_lru[nvm_buffer_control_lru->last_lru];
+    moveToLRUHead(nvm_buf_hdr_lru);
+    unsigned char old_flag = nvm_buf_hdr->nvm_buf_flag;
+    NVMBufferTag old_tag = nvm_buf_hdr->nvm_buf_tag;
+    if(DEBUG)
+    {
+        printf("[INFO]: NVMBufferAlloc() : old_flag&NVM_BUF_DIRTY=%d\n", old_flag&NVM_BUF_DIRTY);
+    }
+    if(old_flag&NVM_BUF_DIRTY!=0)
+    {
+        flushNVMBuffer(nvm_buf_hdr);
+    }
+    if(old_flag&NVM_BUF_VALID!=0)
+    {
+        unsigned long old_hash = nvmBufferTableHashCode(&old_tag);
+        nvmBufferTableDelete(&old_tag, old_hash);
+    }
+    return nvm_buf_hdr;
 }
+
 
 void *hitInLRUBuffer(NVMBufferDesc *nvm_buf_hdr)
 {
