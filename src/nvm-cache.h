@@ -70,9 +70,6 @@ extern void *flushNVMBuffer(NVMBufferDesc *nvm_buf_hdr);
 
 extern NVMEvictionStrategy EvictStrategy;
 
-extern int nvm_fd;
-
-
 
 
 #endif
