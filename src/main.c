@@ -9,14 +9,38 @@
 
 #include<stdio.h>
 #include<stdlib.h>
-#include"raid-5.h"
+#include<string.h>
+#include<sys/types.h>
+#include<sys/stat.h> 
+#include<fcntl.h>
+#include<unistd.h>
+#include "raid/raid-5.h"
+#include "nvm-cache.h"
+#include "main.h"
+#include "trace2call.h"
 
-int main()
+int main(int arc, char *argv[])
 {
     int con, rw;
     long id;
     long i = 0;
+    nvm_fd = open(nvm_device, O_RDWR | O_DIRECT);
+    ssd0_fd = open(ssd_device0, O_RDWR | O_DIRECT);
+    ssd1_fd = open(ssd_device1, O_RDWR | O_DIRECT);
+    ssd2_fd = open(ssd_device2, O_RDWR | O_DIRECT);
+    ssd3_fd = open(ssd_device3, O_RDWR | O_DIRECT);
+    ssd4_fd = open(ssd_device4, O_RDWR | O_DIRECT);
 
+    trace_to_iocall("trace");
+
+    close(nvm_fd);
+    close(ssd0_fd);
+    close(ssd1_fd);
+    close(ssd2_fd);
+    close(ssd3_fd);
+    close(ssd4_fd);
+    return 0;
+/*
     struct timeval tv_begin, tv_end;
     double total_time;
     initPageBuffer(); 
@@ -30,7 +54,7 @@ int main()
         }
         ++i;
         directWrite(id);
-/*
+
         execute(id);
         if(rw==0)
         {
@@ -41,10 +65,11 @@ int main()
         {
             writeOrReadPage(data_ssd_id, 1);
         }
-*/
+
     }
     gettimeofday(&tv_end, NULL);
     total_time = (tv_end.tv_usec - tv_begin.tv_usec)/1000000.0+(tv_end.tv_sec - tv_begin.tv_sec);
     printf("total time = %lf\n",total_time);
     return 0;
+    */
 }
