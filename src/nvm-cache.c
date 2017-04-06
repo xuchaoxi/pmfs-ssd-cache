@@ -14,7 +14,7 @@
 
 static NVMBufferDesc *NVMBufferAlloc(NVMBufferTag nvm_buf_tag, bool *found);
 static void *initStrategyNVMBuffer(NVMEvictionStrategy strategy);
-static NVMBufferDesc *getNVMStrategyBuffer(NVMBufferTag nvm_buf_tag, NVMEvictionStrategy strategy);
+static NVMBufferDesc *getStrategyNVMBuffer(NVMBufferTag nvm_buf_tag, NVMEvictionStrategy strategy);
 static void *hitInNVMBuffer(NVMBufferDesc *nvm_buf_hdr, NVMEvictionStrategy strategy);
 
 void initNVMBuffer()
@@ -52,7 +52,7 @@ static void *initStrategyNVMBuffer(NVMEvictionStrategy strategy)
         initNVMBufferForLRU();
 }
 
-static NVMBufferDesc *getNVMStrategyBuffer(NVMBufferTag nvm_buf_tag, NVMEvictionStrategy strategy)
+static NVMBufferDesc *getStrategyNVMBuffer(NVMBufferTag nvm_buf_tag, NVMEvictionStrategy strategy)
 {
     if(strategy==LRU)
         return getLRUBuffer();
@@ -79,7 +79,7 @@ static NVMBufferDesc *NVMBufferAlloc(NVMBufferTag nvm_buf_tag, bool *found)
         return nvm_buf_hdr;
     }
 
-    nvm_buf_hdr = getNVMStategyBuffer(nvm_buf_tag, EvictStrategy);
+    nvm_buf_hdr = getStategyNVMBuffer(nvm_buf_tag, EvictStrategy);
     // else not hit
     // getstratege
     nvmBufferTableInsert(&nvm_buf_tag, nvm_buf_hash, nvm_buf_hdr->nvm_buf_id);
