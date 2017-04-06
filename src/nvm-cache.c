@@ -7,7 +7,7 @@
 
 #include<stdio.h>
 #include<stdlib.h>
-#include "raid-5.h"
+#include "raid/raid-5.h"
 #include "nvm-cache.h"
 #include "nvm-buf-table.h"
 #include "strategy/lru.h"
