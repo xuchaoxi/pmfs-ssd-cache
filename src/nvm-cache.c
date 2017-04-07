@@ -110,7 +110,7 @@ void *flushNVMBuffer(NVMBufferDesc *nvm_buf_hdr)
         exit(0);
     }
     ret = writeOrReadPage(data_ssd_id, 1);
-    ret = writerReadPage(parity_ssd_id, 1);
+    ret = writeOrReadPage(parity_ssd_id, 1);
     if(ret < 0)
     {
         perror("[ERROR]:");
