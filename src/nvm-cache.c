@@ -69,7 +69,7 @@ static NVMBufferDesc *NVMBufferAlloc(NVMBufferTag nvm_buf_tag, bool *found)
     NVMBufferDesc *nvm_buf_hdr;
     unsigned long nvm_buf_hash = nvmBufferTableHashCode(&nvm_buf_tag);
     long nvm_buf_id = nvmBufferTableLookup(&nvm_buf_tag, nvm_buf_hash);
-    if(nvm_buf_id > 0)
+    if(nvm_buf_id >= 0)
     {
         hit_num++;
         *found = 1;
