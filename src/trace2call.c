@@ -46,13 +46,16 @@ void trace_to_iocall(char *trace_file)
 //            off_t parity_global_offset = parity_raid_offset;
             for(i = 0;i < PAGESIZE;++i)
                 nvm_buffer[i] = '0';
-            if(action=='1')
+  //          if(action=='1')
             {
                 write_block(data_global_offset, nvm_buffer);
             //    write_block(parity_global_offset, nvm_buffer);
             }
-            else
-                read_block(data_global_offset, nvm_buffer);
+    //        else
+            {
+      //          printf("%c\n",action);
+//                read_block(data_global_offset, nvm_buffer);
+            }
     }
     gettimeofday(&tv_now, &tz_now);
     time_now = tv_now.tv_sec + tv_now.tv_usec / 1000000.0;

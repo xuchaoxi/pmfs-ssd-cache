@@ -181,9 +181,10 @@ void write_block(off_t offset, char *nvm_buffer)
     if(flush_nvm_blocks%10000==0)
         printf("hit num:%lu  flush_nvm_blocks:%lu flush_fifo_blocks:\n", hit_num, flush_nvm_blocks);
     ret = pwrite(nvm_fd, nvm_buffer, NVM_BUFFER_SIZE, nvm_buf_hdr->nvm_buf_id*NVM_BUFFER_SIZE);
+    printf("write_block\n");
     if(ret < 0)
     {
-        printf("[ERROR]: nvm_fd=%d, errorcode=%d, offset=%lu\n", nvm_fd, ret, offset);
+        printf("[ERROR]: write_block nvm_fd=%d, errorcode=%d, offset=%lu\n", nvm_fd, ret, offset);
         perror("[ERROR]");
         exit(0);
     }

@@ -21,13 +21,45 @@
 
 int main(int arc, char *argv[])
 {
+    initNVMBuffer();
     nvm_fd = open(nvm_device, O_RDWR | O_DIRECT);
     ssd0_fd = open(ssd0_device, O_RDWR | O_DIRECT);
     ssd1_fd = open(ssd1_device, O_RDWR | O_DIRECT);
     ssd2_fd = open(ssd2_device, O_RDWR | O_DIRECT);
     ssd3_fd = open(ssd3_device, O_RDWR | O_DIRECT);
     ssd4_fd = open(ssd4_device, O_RDWR | O_DIRECT);
+    
+    if(nvm_fd < 0)
+    {
+        perror("[ERROR]:nvm_fd ");
+        exit(0);
+    }
+    if(ssd0_fd < 0)
+    {
+        perror("[ERROR]:ssd0_fd ");
+        exit(0);
+    }
+    if(ssd1_fd < 0)
+    {
+        perror("[ERROR]:ssd1_fd ");
+        exit(0);
+    }
 
+    if(ssd2_fd < 0)
+    {
+        perror("[ERROR]:ssd2_fd ");
+        exit(0);
+    }
+    if(ssd3_fd < 0)
+    {
+        perror("[ERROR]:ssd3_fd ");
+        exit(0);
+    }
+    if(ssd4_fd < 0)
+    {
+        perror("[ERROR]:ssd4_fd ");
+        exit(0);
+    }
     trace_to_iocall("trace");
 
     close(nvm_fd);
