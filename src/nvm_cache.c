@@ -7,9 +7,11 @@
 
 #include<stdio.h>
 #include<stdlib.h>
-#include "raid/raid-5.h"
-#include "nvm-cache.h"
-#include "nvm-buf-table.h"
+#include<unistd.h>
+#include<memory.h>
+#include "raid/raid_5.h"
+#include "nvm_cache.h"
+#include "nvm_buf_table.h"
 #include "strategy/lru.h"
 
 static NVMBufferDesc *NVMBufferAlloc(NVMBufferTag nvm_buf_tag, bool *found);
@@ -50,18 +52,21 @@ static void *initStrategyNVMBuffer(NVMEvictionStrategy strategy)
 {
     if(strategy==LRU)
         initNVMBufferForLRU();
+    return NULL;
 }
 
 static NVMBufferDesc *getStrategyNVMBuffer(NVMBufferTag nvm_buf_tag, NVMEvictionStrategy strategy)
 {
     if(strategy==LRU)
         return getLRUBuffer();
+    return NULL;
 }
 
 static void *hitInNVMBuffer(NVMBufferDesc *nvm_buf_hdr, NVMEvictionStrategy strategy)
 {
     if(strategy==LRU)
         hitInLRUBuffer(nvm_buf_hdr);
+    return NULL;
 }
 
 static NVMBufferDesc *NVMBufferAlloc(NVMBufferTag nvm_buf_tag, bool *found)
@@ -123,7 +128,7 @@ void *flushNVMBuffer(NVMBufferDesc *nvm_buf_hdr)
 
 void read_block(off_t offset, char* nvm_buffer)
 {
-    void *nvm_buf_block;
+    //void *nvm_buf_block;
     bool found = 0;
     int ret;
 

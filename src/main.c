@@ -14,16 +14,13 @@
 #include<sys/stat.h> 
 #include<fcntl.h>
 #include<unistd.h>
-#include "raid/raid-5.h"
-#include "nvm-cache.h"
+#include "raid/raid_5.h"
+#include "nvm_cache.h"
 #include "main.h"
 #include "trace2call.h"
 
 int main(int arc, char *argv[])
 {
-    int con, rw;
-    long id;
-    long i = 0;
     nvm_fd = open(nvm_device, O_RDWR | O_DIRECT);
     ssd0_fd = open(ssd0_device, O_RDWR | O_DIRECT);
     ssd1_fd = open(ssd1_device, O_RDWR | O_DIRECT);

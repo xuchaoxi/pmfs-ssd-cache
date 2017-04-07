@@ -5,8 +5,8 @@
 	> Created Time: Sat 01 Apr 2017 04:52:02 PM CST
  ************************************************************************/
 
-#ifndef _NVM-CACHE_H
-#define _NVM-CACHE_H
+#ifndef _NVM_CACHE_H
+#define _NVM_CACHE_H
 
 #define DEBUG 0
 

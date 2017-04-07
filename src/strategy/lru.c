@@ -7,7 +7,8 @@
 
 #include<stdio.h>
 #include<stdlib.h>
-#include "nvm-cache.h"
+#include "nvm_cache.h"
+#include "nvm_buf_table.h"
 #include "lru.h"
 
 static volatile void *addToLRUHead(NVMBufferDescForLRU *nvm_buf_hdr_lru);
@@ -67,6 +68,7 @@ static volatile void *deleteFromLRU(NVMBufferDescForLRU *nvm_buf_hdr_lru)
     else {
         nvm_buffer_control_lru->last_lru = nvm_buf_hdr_lru->last_lru;
     }
+    return NULL;
 }
 
 static volatile void *moveToLRUHead(NVMBufferDescForLRU *nvm_buf_hdr_lru)
@@ -100,11 +102,11 @@ NVMBufferDesc *getLRUBuffer()
     {
         printf("[INFO]: NVMBufferAlloc() : old_flag&NVM_BUF_DIRTY=%d\n", old_flag&NVM_BUF_DIRTY);
     }
-    if(old_flag&NVM_BUF_DIRTY!=0)
+    if((old_flag&NVM_BUF_DIRTY)!=0)
     {
         flushNVMBuffer(nvm_buf_hdr);
     }
-    if(old_flag&NVM_BUF_VALID!=0)
+    if((old_flag&NVM_BUF_VALID)!=0)
     {
         unsigned long old_hash = nvmBufferTableHashCode(&old_tag);
         nvmBufferTableDelete(&old_tag, old_hash);

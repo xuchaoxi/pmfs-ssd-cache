@@ -5,8 +5,8 @@
 	> Created Time: Fri 31 Mar 2017 12:40:26 PM CST
  ************************************************************************/
 
-#include "raid/raid-5.h"
-#include "nvm-cache.h"
+#include "raid/raid_5.h"
+#include "nvm_cache.h"
 #include "main.h"
 
 size_t BLKSIZE = 524288;  //128*4096;  // block size;

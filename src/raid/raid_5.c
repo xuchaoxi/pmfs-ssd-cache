@@ -13,7 +13,7 @@
 #include<unistd.h>
 #include<sys/stat.h>
 #include<sys/file.h>
-#include "raid-5.h"
+#include "raid_5.h"
 
 void initPageBuffer()
 {

@@ -7,8 +7,8 @@
 
 #include<stdio.h>
 #include<stdlib.h>
-#include "nvm-cache.h"
-#include "raid-5.h"
+#include "nvm_cache.h"
+#include "raid_5.h"
 
 static bool isSamebuf(NVMBufferTag *, NVMBufferTag *);
 
