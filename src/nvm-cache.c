@@ -22,7 +22,7 @@ void initNVMBuffer()
     // init buffer strategy
     initStrategyNVMBuffer(EvictStrategy);
     // init hash table
-    initNVMBufferTable(NNVMBufTables);
+    initNVMBufferTable(NNVMBufferTables);
 
     nvm_buffer_control = (NVMBufferControl*)malloc(sizeof(NVMBufferControl));
     nvm_buffer_control->n_usednvm = 0;
