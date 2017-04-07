@@ -7,14 +7,14 @@
 
 #include<stdio.h>
 #include<stdlib.h>
-#include "../nvm-cache.h"
+#include "nvm-cache.h"
 #include "lru.h"
 
 static volatile void *addToLRUHead(NVMBufferDescForLRU *nvm_buf_hdr_lru);
 static volatile void *deleteFromLRU(NVMBufferDescForLRU *nvm_buf_hdr_lru);
 static volatile void *moveToLRUHead(NVMBufferDescForLRU *nvm_buf_hdr_lru);
 
-void initSSDBufferForLRU()
+void initNVMBufferForLRU()
 {
     nvm_buffer_control_lru = (NVMBufferControlForLRU*)malloc(sizeof(NVMBufferControlForLRU));
     nvm_buffer_control_lru->first_lru = -1;
