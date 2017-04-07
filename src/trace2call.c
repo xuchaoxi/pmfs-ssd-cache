@@ -10,22 +10,22 @@
 #include<string.h>
 #include<sys/time.h>
 #include<unistd.h>
-#include "nvm-cache.h"
-#include "raid/raid-5.h"
+#include "nvm_cache.h"
+#include "raid/raid_5.h"
 
 void trace_to_iocall(char *trace_file)
 {
-    FILE *trace;
+  //  FILE *trace;
 /*    if((trace = fopen(trace_file, "rt"))==NULL)
     {
         exit(0);
     }*/
-    double time, time_begin, time_now;
+    double time_begin, time_now;
     struct timeval tv_begin, tv_now;
     struct timezone tz_begin, tz_now;
     char action;
     off_t offset;
-    size_t size;
+    //size_t size;
     char *nvm_buffer;
     int i;
     gettimeofday(&tv_begin, &tz_begin);
@@ -43,7 +43,7 @@ void trace_to_iocall(char *trace_file)
      //   time_now = tv_now.tv_sec + tv_now.tv.usec / 1000000.0;
             execute(offset);
             off_t data_global_offset = data_raid_offset;
-            off_t parity_global_offset = parity_raid_offset;
+//            off_t parity_global_offset = parity_raid_offset;
             for(i = 0;i < PAGESIZE;++i)
                 nvm_buffer[i] = '0';
             if(action=='1')

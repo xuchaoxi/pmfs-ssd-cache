@@ -5,7 +5,7 @@
 	> Created Time: Thu 30 Mar 2017 04:52:52 PM CST
  ************************************************************************/
 
-#define PAGENUM 128  // how many pages in a block
+#define PAGENUM 64  // how many pages in a block
 #define N 4  // ssd num for data
 
 #include<sys/types.h>

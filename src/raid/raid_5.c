@@ -31,7 +31,7 @@ void initPageBuffer()
 
 // param : page_id is the Nth 4KB
 void execute(off_t offset)
-{   
+{ 
     // the Nth block in the global virtual address
     global_block_id = (long)( offset / PAGENUM);  
 
@@ -56,7 +56,6 @@ void execute(off_t offset)
     // raid-5 offset mapped
     data_raid_offset = (global_stripe_id*(N+1) + data_ssd_id)*PAGENUM + page_off;
     parity_raid_offset = (global_stripe_id*(N+1) + parity_ssd_id)*PAGENUM + page_off; 
-
 }
 
 int writeOrReadPage(int ssd_id, int flag)
