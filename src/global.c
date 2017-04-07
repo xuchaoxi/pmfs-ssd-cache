@@ -17,12 +17,9 @@ char *ssd_path;
 
 int data_ssd_id;
 int parity_ssd_id;
-int block_offset_stripe;
-long global_stripe_id;
-long global_block_id; 
-size_t page_off;
-size_t ssd_page_off; 
-long raid_offset;
+off_t ssd_page_off; 
+off_t data_raid_offset;
+off_t prity_raid_offset;
 
 char *page_buf;
 
