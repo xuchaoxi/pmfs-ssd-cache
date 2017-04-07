@@ -21,12 +21,13 @@ extern long rotate_width;  // rotate width for stripeu
 
 extern int data_ssd_id; // ssd id for data
 extern int parity_ssd_id; // ssd id for parity
-extern int block_offset_stripe; // the block offset in a stripe at global address
-extern long global_stripe_id; // the Nth stripe
-extern long global_block_id; // the Nth block in the global virtual address
-extern size_t page_off; // page offset in a block
-extern size_t ssd_page_off; // page offset at Nth ssd
-extern long raid_offset; // offset in the raid-5 address
+int block_offset_stripe; // the block offset in a stripe at global address
+long global_stripe_id; // the Nth stripe
+long global_block_id; // the Nth block in the global virtual address
+size_t page_off; // page offset in a block
+extern off_t ssd_page_off; // page offset at Nth ssd
+extern off_t data_raid_offset; // data offset in the raid-5 address
+extern off_t parity_raid_offset; // parity offset in the raid-5 address
 
 extern char *ssd_path; // ssd path
 extern char *page_buf; // page buffer

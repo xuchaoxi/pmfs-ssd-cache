@@ -54,7 +54,9 @@ void execute(off_t offset)
     data_ssd_id = (block_offset_stripe >= parity_ssd_id) ? block_offset_stripe+1 : block_offset_stripe;
 //    printf("parity_ssd_id = %d data_ssd_id = %d stripe_id = %d\n", parity_ssd_id, data_ssd_id, global_stripe_id);
     // raid-5 offset mapped
-    raid_offset = (global_stripe_id*(N+1) + data_ssd_id)*PAGENUM + page_off;
+    data_raid_offset = (global_stripe_id*(N+1) + data_ssd_id)*PAGENUM + page_off;
+    parity_raid_offset = (global_stripe_id*(N+1) + parity_ssd_id)*PAGENUM + page_off; 
+
 }
 
 int writeOrReadPage(int ssd_id, int flag)
@@ -79,7 +81,10 @@ int writeOrReadPage(int ssd_id, int flag)
         exit(0);
     }
 //    initPageBuffer();
+ 
+    // ssd_page_offset 
     off_t offset = global_stripe_id*PAGENUM +  page_off;
+    
     int code;
     if(flag==1)
         code = pwrite(ssdfd, page_buf, PAGESIZE, offset*PAGESIZE);   
