@@ -12,6 +12,7 @@
 size_t BLKSIZE = 524288;  //128*4096;  // block size;
 size_t PAGESIZE = 4096;  // page size
 long rotate_width = 100; // rotate width for stripe
+size_t NVM_BUFFER_SIZE = 4096;
 
 char *ssd_path; 
 
@@ -19,7 +20,7 @@ int data_ssd_id;
 int parity_ssd_id;
 off_t ssd_page_off; 
 off_t data_raid_offset;
-off_t prity_raid_offset;
+off_t parity_raid_offset;
 
 char *page_buf;
 
@@ -45,5 +46,11 @@ char ssd4_device[] = "/dev/sdb6";
 
 
 
+unsigned long hit_num;
+unsigned long flush_nvm_blocks;
 unsigned long flush_fifo_times;
+
+NVMBufferDesc *nvm_buffer_descriptors;
+NVMBufferControl *nvm_buffer_control;
+NVMBufferHashBucket *nvm_buffer_hashtable;
 
