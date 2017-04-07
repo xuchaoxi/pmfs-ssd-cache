@@ -51,7 +51,7 @@ long nvmBufferTableInsert(NVMBufferTag *nvm_buf_tag, unsigned long hash_code, si
 {
     if(DEBUG)
         printf("[INFO]:Insert buf_tag=%lu\n", nvm_buf_tag->offset);
-    NVMBufferHashBucket *nowbucket = GETNVMBufferHashBucket(hash_code);
+    NVMBufferHashBucket *nowbucket = GetNVMBufferHashBucket(hash_code);
     while(nowbucket->next!=NULL&&nowbucket!=NULL)
     {
         if(isSamebuf(&nowbucket->hash_key, nvm_buf_tag))
@@ -81,7 +81,7 @@ long nvmBufferTableDelete(NVMBufferTag *nvm_buf_tag, unsigned long hash_code)
 {
     if(DEBUG)
         printf("[INFO]:Delet buf_tag=%lu\n",nvm_buf_tag->offset);
-    NVMBufferHashBucket *nowbucket = GETNVMBufferHashBucket(hash_code);
+    NVMBufferHashBucket *nowbucket = GetNVMBufferHashBucket(hash_code);
     long del_id;
     NVMBufferHashBucket *delitem;
     while(nowbucket->next!=NULL && nowbucket!=NULL)
