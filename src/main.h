@@ -18,9 +18,9 @@ extern int ssd3_fd;
 extern int ssd4_fd;
 
 extern char nvm_device[] ;
-extern char ssd_device0[] ;
-extern char ssd_device1[] ;
-extern char ssd_device2[] ;
-extern char ssd_device3[] ;
-extern char ssd_device4[] ;
+extern char ssd0_device[] ;
+extern char ssd1_device[] ;
+extern char ssd2_device[] ;
+extern char ssd3_device[] ;
+extern char ssd4_device[] ;
 #endif

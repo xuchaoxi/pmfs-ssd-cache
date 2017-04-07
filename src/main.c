@@ -25,11 +25,11 @@ int main(int arc, char *argv[])
     long id;
     long i = 0;
     nvm_fd = open(nvm_device, O_RDWR | O_DIRECT);
-    ssd0_fd = open(ssd_device0, O_RDWR | O_DIRECT);
-    ssd1_fd = open(ssd_device1, O_RDWR | O_DIRECT);
-    ssd2_fd = open(ssd_device2, O_RDWR | O_DIRECT);
-    ssd3_fd = open(ssd_device3, O_RDWR | O_DIRECT);
-    ssd4_fd = open(ssd_device4, O_RDWR | O_DIRECT);
+    ssd0_fd = open(ssd0_device, O_RDWR | O_DIRECT);
+    ssd1_fd = open(ssd1_device, O_RDWR | O_DIRECT);
+    ssd2_fd = open(ssd2_device, O_RDWR | O_DIRECT);
+    ssd3_fd = open(ssd3_device, O_RDWR | O_DIRECT);
+    ssd4_fd = open(ssd4_device, O_RDWR | O_DIRECT);
 
     trace_to_iocall("trace");
 
