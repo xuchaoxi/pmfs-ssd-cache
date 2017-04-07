@@ -41,4 +41,5 @@ lru.o: strategy/lru.c
 .PHONY:clean
 clean:
 	rm *.o
+	rm $(NVM_SSD_CACHE_DIR)/main
 
