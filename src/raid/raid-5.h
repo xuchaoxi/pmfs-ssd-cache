@@ -32,6 +32,10 @@ extern off_t parity_raid_offset; // parity offset in the raid-5 address
 extern char *ssd_path; // ssd path
 extern char *page_buf; // page buffer
 
-
+extern char ssd0_device[];
+extern char ssd1_device[];
+extern char ssd2_device[];
+extern char ssd3_device[];
+extern char ssd4_device[];
 
 

@@ -63,15 +63,15 @@ int writeOrReadPage(int ssd_id, int flag)
 {
     switch(ssd_id)
     {
-        case 0 : ssd_path = "/dev/sdb1";
+        case 0 : ssd_path = ssd0_device;
                  break;
-        case 1 : ssd_path = "/dev/sdb2";
+        case 1 : ssd_path = ssd1_device;
                  break;
-        case 2 : ssd_path = "/dev/sdb3";
+        case 2 : ssd_path = ssd2_device;
                  break;
-        case 3 : ssd_path = "/dev/sdb5";
+        case 3 : ssd_path = ssd3_device;
                  break;
-        case 4 : ssd_path = "/dev/sdb6";
+        case 4 : ssd_path = ssd4_device;
                  break;
     }
     int ssdfd = open(ssd_path, O_WRONLY | O_DIRECT);
