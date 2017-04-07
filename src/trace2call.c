@@ -49,7 +49,7 @@ void trace_to_iocall(char *trace_file)
             if(action=='1')
             {
                 write_block(data_global_offset, nvm_buffer);
-                write_block(parity_global_offset, nvm_buffer);
+            //    write_block(parity_global_offset, nvm_buffer);
             }
             else
                 read_block(data_global_offset, nvm_buffer);
