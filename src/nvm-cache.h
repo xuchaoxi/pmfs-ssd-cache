@@ -60,7 +60,7 @@ extern unsigned long NNVMBuffers;   // 50000
 extern unsigned long NNVMBufferTables;  // 50000
 extern size_t NVM_BUFFER_SIZE; // 4096(4KB)
 
-#define GetNVMBufferHashBucket(hash_code) ((NVMBufferHashBucket*) (nvm_buffer_hashtable + (unsigned)hash_code) 
+#define GetNVMBufferHashBucket(hash_code) ((NVMBufferHashBucket*) (nvm_buffer_hashtable + (unsigned)hash_code)) 
 
 extern void initNVMBuffer();
 extern void read_block(off_t offset, char* nvm_buffer);
