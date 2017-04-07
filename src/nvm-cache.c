@@ -22,7 +22,7 @@ void initNVMBuffer()
     // init buffer strategy
     initStrategyNVMBuffer(EvictStrategy);
     // init hash table
-    initNVMBufTable(NNVMBufTables);
+    initNVMBufferTable(NNVMBufTables);
 
     nvm_buffer_control = (NVMBufferControl*)malloc(sizeof(NVMBufferControl));
     nvm_buffer_control->n_usednvm = 0;
@@ -79,7 +79,7 @@ static NVMBufferDesc *NVMBufferAlloc(NVMBufferTag nvm_buf_tag, bool *found)
         return nvm_buf_hdr;
     }
 
-    nvm_buf_hdr = getStategyNVMBuffer(nvm_buf_tag, EvictStrategy);
+    nvm_buf_hdr = getStrategyNVMBuffer(nvm_buf_tag, EvictStrategy);
     // else not hit
     // getstratege
     nvmBufferTableInsert(&nvm_buf_tag, nvm_buf_hash, nvm_buf_hdr->nvm_buf_id);
@@ -110,6 +110,7 @@ void *flushNVMBuffer(NVMBufferDesc *nvm_buf_hdr)
         exit(0);
     }
     ret = writeOrReadPage(data_ssd_id, 1);
+    ret = writerReadPage(parity_ssd_id, 1);
     if(ret < 0)
     {
         perror("[ERROR]:");
