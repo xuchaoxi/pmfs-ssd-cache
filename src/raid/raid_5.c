@@ -58,7 +58,7 @@ void execute(off_t offset)
     parity_raid_offset = (global_stripe_id*(N+1) + parity_ssd_id)*PAGENUM + page_off; 
 }
 
-int writeOrReadPage(int ssd_id, off_t offset, int flag)
+int writeOrReadPage(int ssd_id, off_t offset, char *buffer, int flag)
 {
     switch(ssd_id)
     {
@@ -86,9 +86,9 @@ int writeOrReadPage(int ssd_id, off_t offset, int flag)
     
     int code;
     if(flag==1)
-        code = pwrite(ssdfd, page_buf, PAGESIZE, offset*PAGESIZE);   
+        code = pwrite(ssdfd, buffer, PAGESIZE, offset*PAGESIZE);   
     else if(flag==0)
-        code = pread(ssdfd, page_buf, PAGENUM, offset*PAGESIZE);
+        code = pread(ssdfd, buffer, PAGENUM, offset*PAGESIZE);
 /*
     if(code < 0)
     {

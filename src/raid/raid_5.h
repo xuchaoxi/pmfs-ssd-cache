@@ -12,7 +12,7 @@
 
 void initPageBuffer();
 void execute(long pageid);
-int writeOrReadPage(int ssd_id, off_t offset, int flag);
+int writeOrReadPage(int ssd_id, off_t offset, char *buffer, int flag);
 void directWrite(long pageid);
 
 extern size_t BLKSIZE;  // block size 128 * 4096
