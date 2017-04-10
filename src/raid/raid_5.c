@@ -58,7 +58,7 @@ void execute(off_t offset)
     parity_raid_offset = (global_stripe_id*(N+1) + parity_ssd_id)*PAGENUM + page_off; 
 }
 
-int writeOrReadPage(int ssd_id, int flag)
+int writeOrReadPage(int ssd_id, off_t offset, int flag)
 {
     switch(ssd_id)
     {
@@ -82,7 +82,7 @@ int writeOrReadPage(int ssd_id, int flag)
 //    initPageBuffer();
  
     // ssd_page_offset 
-    off_t offset = global_stripe_id*PAGENUM +  page_off;
+ //   off_t offset = global_stripe_id*PAGENUM +  page_off;
     
     int code;
     if(flag==1)

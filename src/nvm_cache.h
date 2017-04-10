@@ -18,7 +18,9 @@
 typedef struct
 {
     off_t offset;  // offset at global ssd
-  //  int ssd_id;  // at which ssd
+    int data_ssd_id;  // data at which ssd
+    int parity_ssd_id;  // parity at which ssd
+    off_t ssd_offset;  // page offset at ssd
 } NVMBufferTag;
 
 typedef struct
