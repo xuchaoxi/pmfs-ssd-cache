@@ -10,6 +10,6 @@
 extern void initNVMBufferTable(size_t size);
 extern unsigned long nvmBufferTableHashCode(NVMBufferTag *nvm_buf_tag);
 extern size_t nvmBufferTableLookup(NVMBufferTag *nvm_buf_tag, unsigned long hash_code);
-extern long nvmBufferTableInsert(NVMBufferTag *nvm_buf_tag ,unsigned long hash_code, size_t nvm_buf_id);
-extern long nvmBufferTableDelete(NVMBufferTag *nvm_buf_tag, unsigned long hash_code);
+extern size_t nvmBufferTableInsert(NVMBufferTag *nvm_buf_tag ,unsigned long hash_code, size_t nvm_buf_id);
+extern size_t nvmBufferTableDelete(NVMBufferTag *nvm_buf_tag, unsigned long hash_code);
 #endif
