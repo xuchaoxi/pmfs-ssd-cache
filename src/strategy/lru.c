@@ -46,7 +46,7 @@ static volatile void *addToLRUHead(NVMBufferDescForLRU *nvm_buf_hdr_lru)
        nvm_buf_hdr_lru->next_lru = nvm_buffer_descriptors_lru[nvm_buffer_control_lru->first_lru].nvm_buf_id;
        nvm_buf_hdr_lru->last_lru = -1;
        nvm_buffer_descriptors_lru[nvm_buffer_control_lru->first_lru].last_lru = nvm_buf_hdr_lru->nvm_buf_id;
-    nvm_buffer_control_lru->last_lru = nvm_buf_hdr_lru->nvm_buf_id;
+       nvm_buffer_control_lru->last_lru = nvm_buf_hdr_lru->nvm_buf_id;
     }
     return NULL;
 
@@ -96,21 +96,11 @@ NVMBufferDesc *getLRUBuffer()
     nvm_buf_hdr = &nvm_buffer_descriptors[nvm_buffer_control_lru->last_lru];
     nvm_buf_hdr_lru = &nvm_buffer_descriptors_lru[nvm_buffer_control_lru->last_lru];
     moveToLRUHead(nvm_buf_hdr_lru);
-    unsigned char old_flag = nvm_buf_hdr->nvm_buf_flag;
+    
     NVMBufferTag old_tag = nvm_buf_hdr->nvm_buf_tag;
-    if(DEBUG)
-    {
-        printf("[INFO]: NVMBufferAlloc() : old_flag&NVM_BUF_DIRTY=%d\n", old_flag&NVM_BUF_DIRTY);
-    }
-    if((old_flag&NVM_BUF_DIRTY)!=0)
-    {
-        flushNVMBuffer(nvm_buf_hdr);
-    }
-    if((old_flag&NVM_BUF_VALID)!=0)
-    {
-        unsigned long old_hash = nvmBufferTableHashCode(&old_tag);
-        nvmBufferTableDelete(&old_tag, old_hash);
-    }
+    flushNVMBuffer(nvm_buf_hdr);
+    unsigned long old_hash = nvmBufferTableHashCode(&old_tag);
+    nvmBufferTableDelete(&old_tag, old_hash);
     return nvm_buf_hdr;
 }
 
