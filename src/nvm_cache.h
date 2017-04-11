@@ -20,6 +20,7 @@ typedef struct
     off_t offset;  // offset at global ssd
     int data_ssd_id;  // data at which ssd
     int parity_ssd_id;  // parity at which ssd
+    long stripe_id;  // stripe id
     off_t ssd_offset;  // page offset at ssd
     int flag;  // tag data or parity, data : 1 | parity : 0
 } NVMBufferTag;
