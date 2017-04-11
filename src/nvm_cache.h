@@ -21,19 +21,21 @@ typedef struct
     int data_ssd_id;  // data at which ssd
     int parity_ssd_id;  // parity at which ssd
     off_t ssd_offset;  // page offset at ssd
+    int flag;  // tag data or parity, data : 1 | parity : 0
 } NVMBufferTag;
 
 typedef struct
 {
     NVMBufferTag nvm_buf_tag;  // 
     long nvm_buf_id;       // buffer id
-    unsigned nvm_buf_flag;  // ?
+//    unsigned nvm_buf_flag;   
     long next_freenvm;     // to link next free nvm
 } NVMBufferDesc;
 
 typedef enum {
     ClOCK = 0,
-    LRU
+    LRU,
+    LRUStripe
 }NVMEvictionStrategy;
 
 typedef struct NVMBufferHashBucket

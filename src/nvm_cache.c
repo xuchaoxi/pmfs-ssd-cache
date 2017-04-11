@@ -38,7 +38,6 @@ void initNVMBuffer()
     for(i = 0;i < NNVMBuffers;++i)
     {
         nvm_buf_hdr->nvm_buf_id = i;
-        nvm_buf_hdr->nvm_buf_flag = 0;
         nvm_buf_hdr->next_freenvm = i+1;
         nvm_buf_hdr++;
     }
@@ -81,16 +80,16 @@ static NVMBufferDesc *NVMBufferAlloc(NVMBufferTag nvm_buf_tag, bool *found)
         nvm_buf_hdr = &nvm_buffer_descriptors[nvm_buf_id];
         hitInNVMBuffer(nvm_buf_hdr, EvictStrategy);
         // stratege
-        return nvm_buf_hdr;
     }
-
-    nvm_buf_hdr = getStrategyNVMBuffer(nvm_buf_tag, EvictStrategy);
-    // else not hit
-    // getstratege
-    nvmBufferTableInsert(&nvm_buf_tag, nvm_buf_hash, nvm_buf_hdr->nvm_buf_id);
-    nvm_buf_hdr->nvm_buf_flag &= ~(NVM_BUF_VALID | NVM_BUF_DIRTY);
-    nvm_buf_hdr->nvm_buf_tag = nvm_buf_tag;
-    *found = 0;
+    else 
+    {
+        nvm_buf_hdr = getStrategyNVMBuffer(nvm_buf_tag, EvictStrategy);
+        // else not hit
+        // getstratege
+        nvmBufferTableInsert(&nvm_buf_tag, nvm_buf_hash, nvm_buf_hdr->nvm_buf_id);
+        nvm_buf_hdr->nvm_buf_tag = nvm_buf_tag;
+        *found = 0;
+    }
     return nvm_buf_hdr;   
 }
 
@@ -133,6 +132,7 @@ void *flushNVMBuffer(NVMBufferDesc *nvm_buf_hdr)
         exit(0);
     }
     free(nvm_buffer);
+    flush_nvm_blocks++;
     return NULL;
 }
 
@@ -145,6 +145,12 @@ void read_block(off_t offset, char* nvm_buffer)
     static NVMBufferDesc *nvm_buf_hdr;
     static NVMBufferTag nvm_buf_tag;
     nvm_buf_tag.offset = offset;
+/*
+    nvm_buf_tag.data_ssd_id = data_ssd_id;
+    nvm_buf_tag.ssd_offset = ssd_page_off;
+    nvm_buf_tag.parity_ssd_id = parity_ssd_id;
+    nvm_buf_tag.flag = 1;
+  */
     if(DEBUG)
         printf("[INFO]:read() ------ offset=%lu\n",offset);
     nvm_buf_hdr = NVMBufferAlloc(nvm_buf_tag, &found);
@@ -161,7 +167,7 @@ void read_block(off_t offset, char* nvm_buffer)
     }
     else {
         // read 0
-        ret = writeOrReadPage(data_ssd_id, ssd_page_off,nvm_buffer, 0);
+        ret = writeOrReadPage(data_ssd_id, ssd_page_off, nvm_buffer, 0);
 //        ret = ssdread(ssd_fd, nvm_buffer, NVM_BUFFER_SIZE, offset);
         if(ret < 0)
         {
@@ -170,8 +176,6 @@ void read_block(off_t offset, char* nvm_buffer)
             exit(0);
         }
         flush_nvm_blocks++;
-        nvm_buf_hdr->nvm_buf_flag &= ~NVM_BUF_VALID;
-        nvm_buf_hdr->nvm_buf_flag |= NVM_BUF_VALID;
     }
 }
 
@@ -187,6 +191,7 @@ void write_block(off_t offset, char *nvm_buffer)
     nvm_buf_tag.data_ssd_id = data_ssd_id;
     nvm_buf_tag.ssd_offset = ssd_page_off;
     nvm_buf_tag.parity_ssd_id = parity_ssd_id;
+    nvm_buf_tag.flag = 1;
     if(DEBUG)
         printf("[INFO] write()----offset=%lu\n", offset);
     nvm_buf_hdr = NVMBufferAlloc(nvm_buf_tag, &found);
@@ -200,7 +205,6 @@ void write_block(off_t offset, char *nvm_buffer)
         perror("[ERROR]");
         exit(0);
     }
-    nvm_buf_hdr->nvm_buf_flag |= NVM_BUF_VALID | NVM_BUF_DIRTY;
 }
     
 
