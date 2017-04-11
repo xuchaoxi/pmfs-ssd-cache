@@ -1,6 +1,7 @@
 # Makefile
 
 CC = cc -g
+RM = rm -f
 
 ifndef NVM_SSD_CACHE_DIR
 NVM_SSD_CACHE_DIR = .
@@ -40,6 +41,6 @@ lru.o: strategy/lru.c
 
 .PHONY:clean
 clean:
-	rm *.o
-	rm $(NVM_SSD_CACHE_DIR)/main
+	$(RM) *.o
+	$(RM) $(NVM_SSD_CACHE_DIR)/main
 
