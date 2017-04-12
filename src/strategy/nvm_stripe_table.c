@@ -23,7 +23,7 @@ void initNVMStripeTable(size_t size)
     }
 }
 
-unsigned long nvmBufferTableHashCode(unsigned long stripe_id);
+unsigned long nvmBufferTableHashCode(unsigned long stripe_id)
 {
     unsigned long hashcode = (stripe_id) % STRIPES;
     return hashcode;
@@ -66,7 +66,7 @@ long nvmBufferStripeDelete(unsigned long stripe_id, unsigned long hashcode)
     NVMBufferStripeBucket *nowbucket = GETNVMBufferStripeBucket(hashcode);
     long del_id;
     NVMBufferStripeBucket *delitem;
-    while(nowbuck->next!=NULL && nowbucket!=NULL)
+    while(nowbucket->next!=NULL && nowbucket!=NULL)
     {
         if(nowbucket->next->stripe_id==stripe_id)
         {
