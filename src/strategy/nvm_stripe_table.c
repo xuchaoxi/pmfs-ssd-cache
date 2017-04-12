@@ -46,7 +46,7 @@ long nvmStripeTableInsert(unsigned long stripe_id, unsigned long hashcode, long 
     NVMBufferStripeBucket *nowbucket = GETNVMBufferStripeBucket(hashcode);
     while(nowbucket->next!=NULL && nowbucket!=NULL)
     {
-        if(nowbucket->stripe_id == stripe_id)
+        if(nowbucket->next->stripe_id == stripe_id)
             return nowbucket->lru_buf_id;
         nowbucket = nowbucket->next;
     }
@@ -57,11 +57,6 @@ long nvmStripeTableInsert(unsigned long stripe_id, unsigned long hashcode, long 
         newbucket->lru_buf_id = lru_buf_id;
         newbucket->next = NULL;
         nowbucket->next = newbucket;
-    }
-    else {
-        nowbucket->stripe_id = stripe_id;
-        nowbucket->lru_buf_id = lru_buf_id;
-        nowbucket->next = NULL;
     }
     return -1;
 }
@@ -80,20 +75,10 @@ long nvmBufferStripeDelete(unsigned long stripe_id, unsigned long hashcode)
         }
         nowbucket = nowbucket->next;
     }
-    if(nowbucket->stripe_id==stripe_id)
-    {
-        del_id = stripe_id;
-    }
     if(nowbucket->next!=NULL)
     {
         delitem = nowbucket->next;
         nowbucket->next = nowbucket->next->next;
-        free(delitem);
-        return del_id;
-    }
-    else {
-        delitem = nowbucket->next;
-        nowbucket->next = NULL;
         free(delitem);
         return del_id;
     }
