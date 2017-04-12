@@ -25,7 +25,7 @@ typedef struct
 typedef struct 
 {
     long stripe_id;
-    long strip_buf_id;
+    long stripe_buf_id;
     long next_freelru;
 } NVMStripeBufferDesc;
 
@@ -39,7 +39,7 @@ typedef struct
 typedef struct NVMStripeBufferBucket
 {
     long stripe_id;
-    long lru_buf_id;
+    long stripe_buf_id;
     struct NVMStripeBufferBucket *next;
 } NVMStripeBufferBucket;
 
