@@ -11,7 +11,7 @@
 #define DEBUG 0
 typedef struct 
 {
-    long lru_buf_id;  // lru buffer id
+    long stripe_buf_id;  // lru buffer id
     long next_lru;  // next lru
     long last_lru;  // pre lru
 } NVMStripeBufferDescForLRU;
@@ -25,7 +25,7 @@ typedef struct
 typedef struct 
 {
     long stripe_id;
-    long lru_buf_id;
+    long strip_buf_id;
     long next_freelru;
 } NVMStripeBufferDesc;
 
@@ -36,21 +36,24 @@ typedef struct
     long last_freelru;
 } NVMStripeBufferControl;
 
-typedef struct NVMBufferStripeBucket
+typedef struct NVMStripeBufferBucket
 {
     long stripe_id;
     long lru_buf_id;
-    struct NVMBufferStripeBucket *next;
+    struct NVMStripeBufferBucket *next;
 } NVMStripeBufferBucket;
 
 
-NVMBufferDescForLRUStripe *nvm_buf_descriptors_lru_stripe;
-NVMBufferControlForLRUStripe *nvm_buf_control_lru_stripe;
-NVMBufferStripeBucket *nvm_buf_stripe_table;
+NVMStripeBufferDescForLRU *nvm_stripe_descriptors_lru;
+NVMStripeBufferControlForLRU *nvm_stripe_control_lru;
+NVMStripeBufferBucket *nvm_stripe_table;
 
-#define GETNVMBufferStripeBucket(hashcode) ((NVMBufferStripeBucket*)(nvm_buf_stripe_table+(unsigned long)hashcode))
+NVMStripeBufferControl *nvm_stripe_control;
+NVMStripeBufferDesc *nvm_stripe_descriptors;
 
-extern void initNVMBufferForLRUStripe();
+#define GetNVMStripeBufferBucket(hashcode) ((NVMStripeBufferBucket*)(nvm_stripe_table+(unsigned long)hashcode))
+
+extern void initNVMStripeBufferForLRU();
 /*
 extern void *hitInLRUStripeBuffer(NVMBufferDesc *nvm_buf_hdr_stripe);
 extern NVMBufferDescStripe *getLRUStripeBuffer(NVMBufferTag nvm_buf_tag);
