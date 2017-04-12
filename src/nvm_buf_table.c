@@ -23,8 +23,10 @@ void initNVMBufferTable(size_t size)
         nvm_buf_hdr->hash_key.offset = -1;
         nvm_buf_hdr->hash_key.data_ssd_id = -1;
         nvm_buf_hdr->hash_key.parity_ssd_id = -1;
-        nvm_buf_hdr->hash_key.flag = -1;
+        nvm_buf_hdr->hash_key.stripe_id = -1;
+        nvm_buf_hdr->hash_key.flag = -1;   // data = 1, parity  = 0 
         nvm_buf_hdr->next = NULL;
+        nvm_buf_hdr++;
     }
 }
 
@@ -36,7 +38,7 @@ unsigned long nvmBufferTableHashCode(NVMBufferTag *tag)
     return nvm_buf_hash;
 }
 
-size_t nvmBufferTableLookup(NVMBufferTag *nvm_buf_tag, unsigned long hash_code)
+long nvmBufferTableLookup(NVMBufferTag *nvm_buf_tag, unsigned long hash_code)
 {
     if(DEBUG)
         printf("[INFO]:look up on nvm cache offset=%lu\n", nvm_buf_tag->offset);
@@ -50,16 +52,16 @@ size_t nvmBufferTableLookup(NVMBufferTag *nvm_buf_tag, unsigned long hash_code)
     return -1;
 }
 
-size_t nvmBufferTableInsert(NVMBufferTag *nvm_buf_tag, unsigned long hash_code, size_t nvm_buf_id)
+long nvmBufferTableInsert(NVMBufferTag *nvm_buf_tag, unsigned long hash_code, size_t nvm_buf_id)
 {
     if(DEBUG)
         printf("[INFO]:Insert buf_tag=%lu\n", nvm_buf_tag->offset);
     NVMBufferHashBucket *nowbucket = GetNVMBufferHashBucket(hash_code);
-    while(nowbucket->next!=NULL&&nowbucket!=NULL)
+    while(nowbucket->next != NULL && nowbucket != NULL)
     {
-        if(isSamebuf(&nowbucket->hash_key, nvm_buf_tag))
+        if(isSamebuf(&nowbucket->next->hash_key, nvm_buf_tag))
         {
-            return nowbucket->nvm_buf_id;
+            return head->next->nvm_buf_id;
         }
         nowbucket = nowbucket->next;
     }
@@ -69,7 +71,7 @@ size_t nvmBufferTableInsert(NVMBufferTag *nvm_buf_tag, unsigned long hash_code, 
         newbucket->hash_key = *nvm_buf_tag;
         newbucket->nvm_buf_id = nvm_buf_id;
         newbucket->next = NULL;
-        nowbucket->next = newbucket;
+        head->next = newbucket;
     }
     else {
         nowbucket->nvm_buf_id = nvm_buf_id;
@@ -80,7 +82,7 @@ size_t nvmBufferTableInsert(NVMBufferTag *nvm_buf_tag, unsigned long hash_code, 
 
 }
 
-size_t nvmBufferTableDelete(NVMBufferTag *nvm_buf_tag, unsigned long hash_code)
+long nvmBufferTableDelete(NVMBufferTag *nvm_buf_tag, unsigned long hash_code)
 {
     if(DEBUG)
         printf("[INFO]:Delet buf_tag=%lu\n",nvm_buf_tag->offset);
@@ -96,18 +98,10 @@ size_t nvmBufferTableDelete(NVMBufferTag *nvm_buf_tag, unsigned long hash_code)
         }
         nowbucket = nowbucket->next;
     }
-    if(isSamebuf(&nowbucket->hash_key, nvm_buf_tag))
-        del_id = nowbucket->nvm_buf_id;
     if(nowbucket->next!=NULL)
     {
         delitem = nowbucket->next;
         nowbucket->next = nowbucket->next->next;
-        free(delitem);
-        return del_id;
-    }
-    else {
-        delitem = nowbucket->next;
-        nowbucket->next = NULL;
         free(delitem);
         return del_id;
     }
