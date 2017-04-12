@@ -9,9 +9,10 @@
 #define _NVM_STRIPE_TABLE_H
 
 extern void initNVMStripeTable(size_t size);
-extern unsigned long nvmStripeTableHashcode(unsigned long nvm_stripe_id);
-extern long nvmStripeTableLookup(unsigned long nvm_stripe_id, unsigned long hashcode);
-extern long nvmStripeTableInsert(unsigned long nvm_stripe_id, unsigned long hashcode);
-extern long nvmStripeTableDelete(unsigned long nvm_stripe_id, unsigned long hashcode);
+extern unsigned long nvmStripeTableHashcode(unsigned long stripe_id);
+extern long nvmStripeTableLookup(unsigned long stripe_id, unsigned long hashcode);
+extern long nvmStripeTableInsert(unsigned long stripe_id, unsigned long hashcode, long lru_buf_id);
+extern long nvmStripeTableDelete(unsigned long stripe_id, unsigned long hashcode);
+extern unsigned long nvmStripeTableHashCode(unsigned long stripe_id);
 
 #endif
