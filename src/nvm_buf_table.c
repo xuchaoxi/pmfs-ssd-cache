@@ -73,11 +73,12 @@ long nvmBufferTableInsert(NVMBufferTag *nvm_buf_tag, unsigned long hash_code, si
         newbucket->next = NULL;
         head->next = newbucket;
     }
+    /*
     else {
         nowbucket->nvm_buf_id = nvm_buf_id;
         nowbucket->hash_key = *nvm_buf_tag;
         nowbucket->next = NULL;
-    }
+    }*/
     return -1;
 
 }
