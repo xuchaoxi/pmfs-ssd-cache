@@ -11,7 +11,7 @@
 extern void initNVMStripeTable(size_t size);
 extern unsigned long nvmStripeTableHashcode(unsigned long stripe_id);
 extern long nvmStripeTableLookup(unsigned long stripe_id, unsigned long hashcode);
-extern long nvmStripeTableInsert(unsigned long stripe_id, unsigned long hashcode, long lru_buf_id);
+extern long nvmStripeTableInsert(unsigned long stripe_id, unsigned long hashcode, long stripe_buf_id);
 extern long nvmStripeTableDelete(unsigned long stripe_id, unsigned long hashcode);
 extern unsigned long nvmStripeTableHashCode(unsigned long stripe_id);
 

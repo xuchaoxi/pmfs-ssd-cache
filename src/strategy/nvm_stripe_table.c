@@ -16,7 +16,7 @@ void initNVMStripeTable(size_t size)
     NVMStripeBufferBucket *nvm_buf_hdr = nvm_stripe_table;
     for(i = 0; i < size; ++i)
     {
-        nvm_buf_hdr->lru_buf_id = -1;
+        nvm_buf_hdr->stripe_buf_id = -1;
         nvm_buf_hdr->stripe_id = -1;
         nvm_buf_hdr->next = NULL;
         nvm_buf_hdr++;
@@ -35,26 +35,26 @@ long nvmStripeTableLookup(unsigned long stripe_id, unsigned long hashcode)
     while(nowbucket->next!=NULL && nowbucket!=NULL)
     {
         if(nowbucket->next->stripe_id = stripe_id)
-            return nowbucket->next->lru_buf_id;
+            return nowbucket->next->stripe_buf_id;
         nowbucket = nowbucket->next;
     }
     return -1;
 }
 
-long nvmStripeTableInsert(unsigned long stripe_id, unsigned long hashcode, long lru_buf_id)
+long nvmStripeTableInsert(unsigned long stripe_id, unsigned long hashcode, long stripe_buf_id)
 {
     NVMStripeBufferBucket *nowbucket = GetNVMStripeBufferBucket(hashcode);
     while(nowbucket->next!=NULL && nowbucket!=NULL)
     {
         if(nowbucket->next->stripe_id == stripe_id)
-            return nowbucket->lru_buf_id;
+            return nowbucket->stripe_buf_id;
         nowbucket = nowbucket->next;
     }
     if(nowbucket!=NULL)
     {
         NVMStripeBufferBucket *newbucket = (NVMStripeBufferBucket*)malloc(sizeof(NVMStripeBufferBucket));
         newbucket->stripe_id = stripe_id;
-        newbucket->lru_buf_id = lru_buf_id;
+        newbucket->stripe_buf_id = stripe_buf_id;
         newbucket->next = NULL;
         nowbucket->next = newbucket;
     }
