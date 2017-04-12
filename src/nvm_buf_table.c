@@ -61,7 +61,7 @@ long nvmBufferTableInsert(NVMBufferTag *nvm_buf_tag, unsigned long hash_code, si
     {
         if(isSamebuf(&nowbucket->next->hash_key, nvm_buf_tag))
         {
-            return noubucket->next->nvm_buf_id;
+            return nowbucket->next->nvm_buf_id;
         }
         nowbucket = nowbucket->next;
     }
@@ -71,7 +71,7 @@ long nvmBufferTableInsert(NVMBufferTag *nvm_buf_tag, unsigned long hash_code, si
         newbucket->hash_key = *nvm_buf_tag;
         newbucket->nvm_buf_id = nvm_buf_id;
         newbucket->next = NULL;
-        head->next = newbucket;
+        nowbucket->next = newbucket;
     }
     /*
     else {
