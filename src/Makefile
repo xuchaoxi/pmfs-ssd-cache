@@ -52,5 +52,5 @@ nvm_stripe_table.o: nvm_stripe_table.c
 .PHONY:clean
 clean:
 	$(RM) *.o
-	$(RM) $(NVM_SSD_CACHE_DIR)/main
+	$(RM) $(NVM_SSD_CACHE_DIR)/nvm-ssd-cache
 
