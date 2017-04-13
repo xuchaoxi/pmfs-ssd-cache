@@ -32,8 +32,25 @@ void initPageBuffer()
 // param : page_id is the Nth 4KB
 void execute(off_t offset)
 { 
+/*  size = 4KB
+ */
+    // stripe_id
+    global_stripe_id = (long)(offset / N);
+    // parity ssd id
+    parity_ssd_id = (global_stripe_id / rotate_width) % (N+1);
+    // data ssd id
+    block_offset_stripe = offset % N;
+    data_ssd_id = (block_offset_stripe >= parity_ssd_id) ? block_offset_stripe+1 : block_offset_stripe;
+    // offset map in global raid address
+    data_raid_offset = (global_stripe_id * (N+1)) + data_ssd_id;
+    parity_raid_offset = (global_stripe_id * (N+1)) + parity_ssd_id;
+
+
+/*  old 
+ *  use BLOCKSIZE & PAGENUM
     // the Nth block in the global virtual address
     global_block_id = (long)( offset / PAGENUM);  
+    
 
     // page offset in a block
     page_off = offset % PAGENUM;
@@ -56,6 +73,7 @@ void execute(off_t offset)
     // raid-5 offset mapped
     data_raid_offset = (global_stripe_id*(N+1) + data_ssd_id)*PAGENUM + page_off;
     parity_raid_offset = (global_stripe_id*(N+1) + parity_ssd_id)*PAGENUM + page_off; 
+*/
 }
 
 int writeOrReadPage(int ssd_id, off_t offset, char *buffer, int flag)
