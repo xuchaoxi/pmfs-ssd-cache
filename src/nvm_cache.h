@@ -99,6 +99,7 @@ extern void initNVMBuffer();
 extern void read_block(off_t offset, char* nvm_buffer);
 extern void write_block(off_t offset, char* nvm_buffer);
 extern void *flushNVMBuffer(NVMBufferDesc *nvm_buf_hdr);
+extern void *flushNVMStripeBuffer(NVMStripeBufferDesc *nvm_buf_hdr);
 
 
 extern NVMEvictionStrategy EvictStrategy;

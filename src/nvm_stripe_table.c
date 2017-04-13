@@ -34,7 +34,7 @@ long nvmStripeTableLookup(unsigned long stripe_id, unsigned long hashcode)
     NVMStripeBufferBucket *nowbucket = GetNVMStripeBufferBucket(hashcode);
     while(nowbucket->next!=NULL && nowbucket!=NULL)
     {
-        if(nowbucket->next->stripe_id = stripe_id)
+        if(nowbucket->next->stripe_id == stripe_id)
             return nowbucket->next->stripe_buf_id;
         nowbucket = nowbucket->next;
     }

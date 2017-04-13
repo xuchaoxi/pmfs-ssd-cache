@@ -157,10 +157,13 @@ void *flushNVMBuffer(NVMBufferDesc *nvm_buf_hdr)
         exit(0);
     }
     ret = writeOrReadPage(data_id, ssd_offset, nvm_buffer, 1);
+        return nvm_buf_hdr;
     if(ret < 0)
     {
         perror("[ERROR]:");
+        return nvm_buf_hdr;
         printf("flushNVMBuffer()------write to data_ssd_id=%d, errorcode=%d, offset=%lu\n",data_id, ret, nvm_buf_hdr->nvm_buf_tag.offset);
+        return nvm_buf_hdr;
         exit(0);
     }
     ret = writeOrReadPage(parity_id, ssd_offset,nvm_buffer, 1);
@@ -172,6 +175,46 @@ void *flushNVMBuffer(NVMBufferDesc *nvm_buf_hdr)
     }
     free(nvm_buffer);
     flush_nvm_blocks++;
+    return NULL;
+}
+
+void *flushNVMStripeBuffer(NVMStripeBufferDesc *nvm_stripe_hdr)
+{
+    long stripe_id = nvm_stripe_hdr->stripe_id;
+    off_t page_id = stripe_id * N;   // 4 if parity not in cache
+    int i = 0;
+    int firstOrlast = 0;
+    for(i = 0; i < N ;++i)
+    {
+        NVMBufferTag nvm_buf_tag;
+        nvm_buf_tag.offset = page_id + i;
+        unsigned long hashcode = nvmBufferTableHashCode(&nvm_buf_tag);
+        long nvm_buf_id = nvmBufferTableLookup(&nvm_buf_tag, hashcode);
+        // nvm buffer exist
+        if(nvm_buf_id >= 0 && firstOrlast==0)
+        {
+            NVMBufferDesc *nvm_buf_hdr = &nvm_buffer_descriptors[nvm_buf_id];
+            nvm_buffer_control->first_freenvm = nvm_buf_hdr->nvm_buf_id;
+            nvm_buffer_descriptors[nvm_buf_id].next_freenvm = -1;
+            nvm_buffer_control->n_usednvm--;
+            firstOrlast = 1;
+            flushNVMBuffer(nvm_buf_hdr);
+        }
+        if(nvm_buf_id >= 0 && firstOrlast==1)
+        {
+            NVMBufferDesc *nvm_buf_hdr = &nvm_buffer_descriptors[nvm_buf_id];
+            nvm_buf_hdr->next_freenvm = nvm_buffer_descriptors[nvm_buffer_control->first_freenvm].next_freenvm;
+            nvm_buffer_descriptors[nvm_buffer_control->first_freenvm].next_freenvm = nvm_buf_hdr->nvm_buf_id;
+            nvm_buffer_control->n_usednvm--;
+            flushNVMBuffer(nvm_buf_hdr);
+        }
+    }
+    long id = nvm_buffer_control->first_freenvm;
+    while(nvm_buffer_descriptors[id].next_freenvm != -1)
+    {
+        id = nvm_buffer_descriptors[id].next_freenvm;
+    }
+    nvm_buffer_control->last_freenvm = id;
     return NULL;
 }
 
