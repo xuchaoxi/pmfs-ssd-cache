@@ -29,7 +29,7 @@ unsigned long NNVMBuffers = 500000;
 unsigned long NNVMBufferTables = 500000;
 unsigned long STRIPES = 500000;
 
-NVMEvictionStrategy EvictStrategy = FIFO;
+NVMEvictionStrategy EvictStrategy = LRUSTRIPE;
 
 int nvm_fd;
 int ssd0_fd;

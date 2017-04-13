@@ -139,5 +139,16 @@ NVMStripeBufferDesc *getLRUStripe(NVMBufferTag nvm_buf_tag)
 
 void *hitInLRUStripeBuffer(NVMBufferDesc *nvm_buf_hdr)
 {
+    NVMStripeBufferDesc *nvm_stripe_hdr;
+    NVMStripeBufferDescForLRU *nvm_stripe_hdr_lru;
+    long stripe_id = nvm_buf_hdr->nvm_buf_tag.stripe_id;
+    unsigned long hashcode = nvmStripeTableHashCode(stripe_id);
+    long stripe_buf_id = nvmStripeTableLookup(stripe_id, hashcode);
+    if(stripe_buf_id >= 0)
+    {
+        nvm_stripe_hdr = &nvm_stripe_descriptors[stripe_buf_id];
+        nvm_stripe_hdr_lru = &nvm_stripe_descriptors_lru[stripe_buf_id];
+        moveToLRUStripeHead(nvm_stripe_hdr_lru);
+    }
     return NULL;
 }

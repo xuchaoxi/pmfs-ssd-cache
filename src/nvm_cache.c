@@ -101,7 +101,7 @@ static void *hitInNVMBuffer(NVMBufferDesc *nvm_buf_hdr, NVMEvictionStrategy stra
     if(strategy==LRU)
         hitInLRUBuffer(nvm_buf_hdr);
     if(strategy==LRUSTRIPE);
-    //    hitInLRUStripeBuffer(nvm_buf_hdr);
+        hitInLRUStripeBuffer(nvm_buf_hdr);
     if(strategy==FIFO)
         hitInFIFOBuffer(nvm_buf_hdr);
     return NULL;

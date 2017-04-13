@@ -12,10 +12,10 @@ CPPFLAGS += -I$(NVM_SSD_CACHE_DIR) -I$(NVM_SSD_CACHE_DIR)/strategy -I$(NVM_SSD_C
 
 OBJS = main.o raid_5.o global.o nvm_buf_table.o nvm_cache.o trace2call.o lru.o lrustripe.o fifo.o nvm_stripe_table.o
 
-#all: $(OBJS) build
-#	@echo 'Bulid Successfully'
+all: $(OBJS) nvm-ssd-cache
+	@echo 'Bulid Successfully nvm-ssd-cache...'
 
-main: $(OBJS)
+nvm-ssd-cache:
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(OBJS) -o $@
 	
 main.o: main.c
