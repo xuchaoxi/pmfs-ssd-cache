@@ -47,7 +47,7 @@ long nvmStripeTableInsert(unsigned long stripe_id, unsigned long hashcode, long 
     while(nowbucket->next!=NULL && nowbucket!=NULL)
     {
         if(nowbucket->next->stripe_id == stripe_id)
-            return nowbucket->stripe_buf_id;
+            return nowbucket->next->stripe_buf_id;
         nowbucket = nowbucket->next;
     }
     if(nowbucket!=NULL)
@@ -70,7 +70,7 @@ long nvmStripeDelete(unsigned long stripe_id, unsigned long hashcode)
     {
         if(nowbucket->next->stripe_id==stripe_id)
         {
-            del_id = stripe_id;
+            del_id = nowbucket->next->stripe_buf_id;
             break;
         }
         nowbucket = nowbucket->next;
@@ -84,7 +84,4 @@ long nvmStripeDelete(unsigned long stripe_id, unsigned long hashcode)
     }
     return -1;
 }
-
-
-
 
