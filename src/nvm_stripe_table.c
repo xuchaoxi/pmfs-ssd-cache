@@ -7,7 +7,7 @@
 
 #include<stdio.h>
 #include<stdlib.h>
-#include "lrustripe.h"
+#include "nvm_cache.h"
 
 void initNVMStripeTable(size_t size)
 {

@@ -54,9 +54,34 @@ typedef struct
     long last_freenvm;  // tail of free nvm list
 } NVMBufferControl;
 
+typedef struct 
+{
+    long stripe_id;
+    long stripe_buf_id;  //  buffer id
+    long next_freebuf;  
+} NVMStripeBufferDesc;
+
+typedef struct NVMStripeBufferBucket
+{
+    long stripe_id;
+    long stripe_buf_id;
+    struct NVMStripeBufferBucket *next;
+} NVMStripeBufferBucket;
+
+typedef struct 
+{
+    long n_usedbuf;  // to evict
+    long first_freebuf; // head of free buffer
+    long last_freebuf;  // tail of free buffer
+} NVMStripeBufferControl;
+
 extern NVMBufferDesc *nvm_buffer_descriptors;  // describe nvm addr
 extern NVMBufferHashBucket *nvm_buffer_hashtable;
 extern NVMBufferControl *nvm_buffer_control;
+
+extern NVMStripeBufferDesc *nvm_stripe_descriptors; 
+extern NVMStripeBufferControl *nvm_stripe_control;
+extern NVMStripeBufferBucket *nvm_stripe_table;
 
 extern unsigned long hit_num;
 extern unsigned long flush_nvm_blocks;
@@ -64,8 +89,10 @@ extern unsigned long flush_nvm_blocks;
 extern unsigned long NNVMBuffers;   // 50000
 extern unsigned long NNVMBufferTables;  // 50000
 extern size_t NVM_BUFFER_SIZE; // 4096(4KB)
+extern unsigned long STRIPES;  // 50000
 
-#define GetNVMBufferHashBucket(hash_code) ((NVMBufferHashBucket*) (nvm_buffer_hashtable + (unsigned)hash_code)) 
+#define GetNVMBufferHashBucket(hash_code) ((NVMBufferHashBucket*) (nvm_buffer_hashtable + (unsigned long)hash_code))
+#define GetNVMStripeBufferBucket(hashcode) ((NVMStripeBufferBucket*)(nvm_stripe_table + (unsigned long)hashcode))
 
 extern void initNVMBuffer();
 extern void read_block(off_t offset, char* nvm_buffer);
