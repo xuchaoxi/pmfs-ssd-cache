@@ -21,6 +21,8 @@
 
 int main(int arc, char *argv[])
 {
+    int i, j;
+    off_t off;
     initNVMBuffer();
     initNVMStripeBuffer();
     nvm_fd = open(nvm_device, O_RDWR | O_DIRECT);

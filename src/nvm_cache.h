@@ -37,7 +37,8 @@ typedef enum {
     ClOCK = 0,
     LRU,
     LRUSTRIPE,
-    FIFO
+    FIFO,
+    FIFOSTRIPE
 }NVMEvictionStrategy;
 
 typedef struct NVMBufferHashBucket

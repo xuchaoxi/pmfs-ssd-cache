@@ -21,6 +21,7 @@ int parity_ssd_id;
 off_t ssd_page_off; 
 off_t data_raid_offset;
 off_t parity_raid_offset;
+long global_stripe_id;
 
 char *page_buf;
 
@@ -29,7 +30,7 @@ unsigned long NNVMBuffers = 500000;
 unsigned long NNVMBufferTables = 500000;
 unsigned long STRIPES = 500000;
 
-NVMEvictionStrategy EvictStrategy = LRUSTRIPE;
+NVMEvictionStrategy EvictStrategy = FIFOSTRIPE;
 
 int nvm_fd;
 int ssd0_fd;

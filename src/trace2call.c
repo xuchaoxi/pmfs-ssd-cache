@@ -23,7 +23,7 @@ void trace_to_iocall(char *trace_file)
     double time_begin, time_now;
     struct timeval tv_begin, tv_now;
     struct timezone tz_begin, tz_now;
-    char action;
+    int action;
     off_t offset;
     //size_t size;
     char *nvm_buffer;
@@ -37,10 +37,10 @@ void trace_to_iocall(char *trace_file)
         perror("[ERROR]:");
         exit(0);
     }
-    while(scanf("%c %d %lu", &action, &i, &offset)!=EOF)
+    while(scanf("%d %d %lu", &action, &i, &offset)!=EOF)
     {
-    //    gettimeofday(&tv_now, &tz_now);
-     //   time_now = tv_now.tv_sec + tv_now.tv.usec / 1000000.0;
+//        gettimeofday(&tv_now, &tz_now);
+ //       time_now = tv_now.tv_sec + tv_now.tv.usec / 1000000.0;
             execute(offset);
             off_t data_global_offset = data_raid_offset;
 //            off_t parity_global_offset = parity_raid_offset;

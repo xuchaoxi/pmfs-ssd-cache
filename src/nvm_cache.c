@@ -16,6 +16,7 @@
 #include "strategy/lru.h"
 #include "strategy/lrustripe.h"
 #include "strategy/fifo.h"
+#include "strategy/fifostripe.h"
 
 static NVMBufferDesc *NVMBufferAlloc(NVMBufferTag nvm_buf_tag, bool *found);
 static void *initStrategyNVMBuffer(NVMEvictionStrategy strategy);
@@ -82,6 +83,8 @@ static void *initStrategyNVMBuffer(NVMEvictionStrategy strategy)
         initNVMStripeBufferForLRU();
     if(strategy==FIFO)
         initNVMBufferForFIFO();
+    if(strategy==FIFOSTRIPE)
+        initNVMStripeBufferForFIFO();
     return NULL;
 }
 
@@ -93,6 +96,8 @@ static NVMBufferDesc *getStrategyNVMBuffer(NVMBufferTag nvm_buf_tag, NVMEviction
         return getLRUStripeBuffer(nvm_buf_tag);
     if(strategy==FIFO)
         return getFIFOBuffer();
+    if(strategy==FIFOSTRIPE)
+        return getFIFOStripeBuffer(nvm_buf_tag);
     return NULL;
 }
 
@@ -104,6 +109,8 @@ static void *hitInNVMBuffer(NVMBufferDesc *nvm_buf_hdr, NVMEvictionStrategy stra
         hitInLRUStripeBuffer(nvm_buf_hdr);
     if(strategy==FIFO)
         hitInFIFOBuffer(nvm_buf_hdr);
+    if(strategy==FIFOSTRIPE)
+        hitInFIFOStripeBuffer(nvm_buf_hdr);
     return NULL;
 }
 
@@ -273,6 +280,7 @@ void write_block(off_t offset, char *nvm_buffer)
     nvm_buf_tag.data_ssd_id = data_ssd_id;
     nvm_buf_tag.ssd_offset = ssd_page_off;
     nvm_buf_tag.parity_ssd_id = parity_ssd_id;
+    nvm_buf_tag.stripe_id = global_stripe_id;
     nvm_buf_tag.flag = 1;
     if(DEBUG)
         printf("[INFO] write()----offset=%lu\n", offset);
