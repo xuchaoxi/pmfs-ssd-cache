@@ -61,7 +61,7 @@ long nvmStripeTableInsert(unsigned long stripe_id, unsigned long hashcode, long 
     return -1;
 }
 
-long nvmStripeDelete(unsigned long stripe_id, unsigned long hashcode)
+long nvmStripeTableDelete(unsigned long stripe_id, unsigned long hashcode)
 {
     NVMStripeBufferBucket *nowbucket = GetNVMStripeBufferBucket(hashcode);
     long del_id;

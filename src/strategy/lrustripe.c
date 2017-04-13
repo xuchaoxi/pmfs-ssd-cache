@@ -7,14 +7,14 @@
 
 #include<stdio.h>
 #include<stdlib.h>
-#include "../nvm_cache.h"
+#include "nvm_cache.h"
 #include "nvm_stripe_table.h"
 #include "lrustripe.h"
 
 static volatile void *addToLRUStripeHead(NVMStripeBufferDescForLRU *nvm_buf_hdr_lru);
 static volatile void *deleteFromLRUStripe(NVMStripeBufferDescForLRU *nvm_buf_hdr_lru);
 static volatile void *moveToLRUStripeHead(NVMStripeBufferDescForLRU *nvm_buf_hdr_lru);
-NVMStripeBufferDesc *getLRUStripe(NVMBufferTag nvm_buf_tag);
+static NVMStripeBufferDesc *getLRUStripe(NVMBufferTag nvm_buf_tag);
 
 void initNVMStripeBufferForLRU()
 {
@@ -35,31 +35,9 @@ void initNVMStripeBufferForLRU()
     }
 }
 
-void initNVMStripeBuffer()
-{
-    initNVMStripeBufferForLRU();
-    initNVMStripeTable(STRIPES);
-
-    nvm_stripe_control = (NVMStripeBufferControl*)malloc(sizeof(NVMStripeBufferControl));
-    nvm_stripe_control->n_usedlru = 0;
-    nvm_stripe_control->first_freelru = 0;
-    nvm_stripe_control->last_freelru = STRIPES-1;
-
-    nvm_stripe_descriptors = (NVMStripeBufferDesc*)malloc(sizeof(NVMStripeBufferDesc)*STRIPES);
-    NVMStripeBufferDesc *nvm_stripe_hdr = nvm_stripe_descriptors;
-    long i;
-    for(i = 0;i < STRIPES;++i)
-    {
-        nvm_stripe_hdr->stripe_buf_id = i;
-        nvm_stripe_hdr->next_freelru = i+1;
-        nvm_stripe_hdr++;
-    }
-    nvm_stripe_descriptors[STRIPES-1].next_freelru = -1;
-}
-
 static volatile void *addToLRUStripeHead(NVMStripeBufferDescForLRU *nvm_buf_hdr_lru)
 {
-    if(nvm_stripe_control->n_usedlru==0)
+    if(nvm_stripe_control->n_usedbuf==0)
     {
         nvm_stripe_control_lru->first_lru = nvm_buf_hdr_lru->stripe_buf_id;
         nvm_stripe_control_lru->last_lru = nvm_buf_hdr_lru->stripe_buf_id;
@@ -88,7 +66,6 @@ static volatile void *deleteFromLRUStripe(NVMStripeBufferDescForLRU *nvm_buf_hdr
     }
     else {
         nvm_stripe_control_lru->last_lru = nvm_buf_hdr_lru->last_lru;
-    long nvm_buf_stripe_id;  // nvm buffer stripe id
     }
     return NULL;
 }
@@ -96,7 +73,7 @@ static volatile void *deleteFromLRUStripe(NVMStripeBufferDescForLRU *nvm_buf_hdr
 static volatile void *moveToLRUStripeHead(NVMStripeBufferDescForLRU *nvm_buf_hdr_lru)
 {
     deleteFromLRUStripe(nvm_buf_hdr_lru);
-    addToLRUHead(nvm_buf_hdr_lru);
+    addToLRUStripeHead(nvm_buf_hdr_lru);
     return NULL;
 }
 
@@ -120,31 +97,41 @@ NVMBufferDesc *getLRUStripeBuffer(NVMBufferTag nvm_buf_tag)
             nvm_stripe_hdr = getLRUStripe(nvm_buf_tag);
             nvmStripeTableInsert(nvm_buf_tag.stripe_id, hashcode, nvm_stripe_hdr->stripe_buf_id);
         }
-        nvm_buffer_control->first_freenvm = nvm_buf_hdr->next_freenvm;
-        nvm_buf_hdr->next_freenvm = -1;
-        nvm_buffer_control->n_usednvm++;
         return nvm_buf_hdr;
     }
-    else {
+    else { // no free buffer
+        nvm_stripe_hdr = &nvm_stripe_descriptors[nvm_stripe_control_lru->last_lru];
+        nvm_stripe_hdr_lru = &nvm_stripe_descriptors_lru[nvm_stripe_control_lru->last_lru];
+        moveToLRUStripeHead(nvm_stripe_hdr_lru);
+     //   flushNVMStripeBuffer();
+        unsigned long oldhash = nvmStripeTableHashCode(nvm_stripe_hdr->stripe_id);
+        nvmStripeTableDelete(nvm_stripe_hdr->stripe_id, oldhash);
+
    //     nvm_stripe_hdr_lru = nvm_stripe_descriptors_lru[nvm_stripe_control_lru->last_lru];
  //       flushStripe(nvm_stripe_lru);
     } 
-
+    return nvm_buf_hdr;
 }
 
 NVMStripeBufferDesc *getLRUStripe(NVMBufferTag nvm_buf_tag)
 {
     NVMStripeBufferDescForLRU *nvm_stripe_hdr_lru;
     NVMStripeBufferDesc *nvm_stripe_hdr;
-    if(nvm_stripe_control->first_freelru >= 0)
+    if(nvm_stripe_control->first_freebuf >= 0)
     {
-        nvm_stripe_hdr = &nvm_stripe_descriptors[nvm_stripe_control->first_freelru];
-        nvm_stripe_hdr_lru = &nvm_stripe_descriptors_lru[nvm_stripe_control->first_freelru];
-        nvm_stripe_control->first_freelru = nvm_stripe_hdr->next_freelru;
-        nvm_stripe_hdr->next_freelru = -1;
-        moveToLRUStripeHead(nvm_stripe_hdr_lru);
+        nvm_stripe_hdr = &nvm_stripe_descriptors[nvm_stripe_control->first_freebuf];
+        nvm_stripe_hdr_lru = &nvm_stripe_descriptors_lru[nvm_stripe_control->first_freebuf];
+
+        nvm_stripe_control->first_freebuf = nvm_stripe_hdr->next_freebuf;
+        nvm_stripe_hdr->next_freebuf = -1;
+
+        addToLRUStripeHead(nvm_stripe_hdr_lru);
+        nvm_stripe_control->n_usedbuf++;
     }
     return nvm_stripe_hdr;
 }
 
-
+void *hitInLRUStripeBuffer(NVMBufferDesc *nvm_buf_hdr)
+{
+    return NULL;
+}

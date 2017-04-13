@@ -1,5 +1,5 @@
 /*************************************************************************
-	> File Name: nvm-cache.c
+	> File Name: nvm_cache.c
 	> Author: Chaoxi Xu
 	> Mail: xuchaoxikb@gmail.com
 	> Created Time: Sat 01 Apr 2017 05:04:26 PM CST
@@ -12,7 +12,10 @@
 #include "raid/raid_5.h"
 #include "nvm_cache.h"
 #include "nvm_buf_table.h"
+#include "nvm_stripe_table.h"
 #include "strategy/lru.h"
+#include "strategy/lrustripe.h"
+#include "strategy/fifo.h"
 
 static NVMBufferDesc *NVMBufferAlloc(NVMBufferTag nvm_buf_tag, bool *found);
 static void *initStrategyNVMBuffer(NVMEvictionStrategy strategy);
@@ -47,10 +50,38 @@ void initNVMBuffer()
     flush_nvm_blocks = 0;
 }
 
+// stripe buffer
+void initNVMStripeBuffer()
+{
+
+//    initStrategyNVMBuffer(EvictStrategy);
+    initNVMStripeTable(STRIPES);
+
+    nvm_stripe_control = (NVMStripeBufferControl*)malloc(sizeof(NVMStripeBufferControl));
+    nvm_stripe_control->n_usedbuf = 0;
+    nvm_stripe_control->first_freebuf = 0;
+    nvm_stripe_control->last_freebuf = STRIPES-1;
+
+    nvm_stripe_descriptors = (NVMStripeBufferDesc*)malloc(sizeof(NVMStripeBufferDesc)*STRIPES);
+    NVMStripeBufferDesc *nvm_stripe_hdr = nvm_stripe_descriptors;
+    long i;
+    for(i = 0;i < STRIPES;++i)
+    {
+        nvm_stripe_hdr->stripe_buf_id = i;
+        nvm_stripe_hdr->next_freebuf = i+1;
+        nvm_stripe_hdr++;
+    }
+    nvm_stripe_descriptors[STRIPES-1].next_freebuf = -1;
+}
+
 static void *initStrategyNVMBuffer(NVMEvictionStrategy strategy)
 {
     if(strategy==LRU)
         initNVMBufferForLRU();
+    if(strategy==LRUSTRIPE)
+        initNVMStripeBufferForLRU();
+    if(strategy==FIFO)
+        initNVMBufferForFIFO();
     return NULL;
 }
 
@@ -58,6 +89,10 @@ static NVMBufferDesc *getStrategyNVMBuffer(NVMBufferTag nvm_buf_tag, NVMEviction
 {
     if(strategy==LRU)
         return getLRUBuffer();
+    if(strategy==LRUSTRIPE)
+        return getLRUStripeBuffer(nvm_buf_tag);
+    if(strategy==FIFO)
+        return getFIFOBuffer();
     return NULL;
 }
 
@@ -65,6 +100,10 @@ static void *hitInNVMBuffer(NVMBufferDesc *nvm_buf_hdr, NVMEvictionStrategy stra
 {
     if(strategy==LRU)
         hitInLRUBuffer(nvm_buf_hdr);
+    if(strategy==LRUSTRIPE);
+    //    hitInLRUStripeBuffer(nvm_buf_hdr);
+    if(strategy==FIFO)
+        hitInFIFOBuffer(nvm_buf_hdr);
     return NULL;
 }
 
@@ -153,7 +192,7 @@ void read_block(off_t offset, char* nvm_buffer)
   */
     if(DEBUG)
         printf("[INFO]:read() ------ offset=%lu\n",offset);
-    nvm_buf_hdr = NVMBufferAlloc(nvm_buf_tag, &found);
+ //   nvm_buf_hdr = NVMBufferAlloc(nvm_buf_tag, &found);
     if(found==1)
     {
         // read 4KB

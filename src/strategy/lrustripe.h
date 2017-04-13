@@ -23,18 +23,14 @@ typedef struct
 } NVMStripeBufferControlForLRU;
 
 
-
 NVMStripeBufferDescForLRU *nvm_stripe_descriptors_lru;
 NVMStripeBufferControlForLRU *nvm_stripe_control_lru;
 
+extern unsigned long flush_fifo_times;
 
 extern void initNVMStripeBufferForLRU();
-/*
-extern void *hitInLRUStripeBuffer(NVMBufferDesc *nvm_buf_hdr_stripe);
-extern NVMBufferDescStripe *getLRUStripeBuffer(NVMBufferTag nvm_buf_tag);
-*/
-
-
+extern NVMBufferDesc *getLRUStripeBuffer(NVMBufferTag nvm_buf_tag);
+extern void *hitInLRUStripeBuffer(NVMBufferDesc *);
 
 
 #endif

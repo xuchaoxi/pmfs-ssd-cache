@@ -27,8 +27,9 @@ char *page_buf;
 
 unsigned long NNVMBuffers = 500000;
 unsigned long NNVMBufferTables = 500000;
+unsigned long STRIPES = 500000;
 
-NVMEvictionStrategy EvictStrategy = LRU;
+NVMEvictionStrategy EvictStrategy = FIFO;
 
 int nvm_fd;
 int ssd0_fd;
@@ -53,4 +54,8 @@ unsigned long flush_fifo_times;
 NVMBufferDesc *nvm_buffer_descriptors;
 NVMBufferControl *nvm_buffer_control;
 NVMBufferHashBucket *nvm_buffer_hashtable;
+
+NVMStripeBufferDesc *nvm_stripe_descriptors;
+NVMStripeBufferControl *nvm_stripe_control;
+NVMStripeBufferBucket *nvm_stripe_table;
 
