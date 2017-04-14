@@ -21,10 +21,8 @@
 
 int main(int arc, char *argv[])
 {
-    int i, j;
-    off_t off;
     initNVMBuffer();
-    initNVMStripeBuffer();
+//    initNVMStripeBuffer();
     nvm_fd = open(nvm_device, O_RDWR | O_DIRECT);
     ssd0_fd = open(ssd0_device, O_RDWR | O_DIRECT);
     ssd1_fd = open(ssd1_device, O_RDWR | O_DIRECT);

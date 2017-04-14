@@ -11,7 +11,7 @@
 
 size_t BLKSIZE = 524288;  //128*4096;  // block size;
 size_t PAGESIZE = 4096;  // page size
-long rotate_width = 100; // rotate width for stripe
+long rotate_width = 1280; // rotate width for stripe
 size_t NVM_BUFFER_SIZE = 4096;
 
 char *ssd_path; 
@@ -30,7 +30,7 @@ unsigned long NNVMBuffers = 500000;
 unsigned long NNVMBufferTables = 500000;
 unsigned long STRIPES = 500000;
 
-NVMEvictionStrategy EvictStrategy = FIFOSTRIPE;
+NVMEvictionStrategy EvictStrategy = FIFO;
 
 int nvm_fd;
 int ssd0_fd;
@@ -49,8 +49,8 @@ char ssd4_device[] = "/home/xcx/design/device/ssd4";
 
 
 unsigned long hit_num;
-unsigned long flush_nvm_blocks;
-unsigned long flush_fifo_times;
+unsigned long write_blocks;
+unsigned long flush_blocks;
 
 NVMBufferDesc *nvm_buffer_descriptors;
 NVMBufferControl *nvm_buffer_control;

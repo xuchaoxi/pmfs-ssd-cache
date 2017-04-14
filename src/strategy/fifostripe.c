@@ -16,8 +16,12 @@ static volatile void *addToFIFOTail(NVMStripeBufferDescForFIFO *nvm_buf_hdr_fifo
 static volatile void *deleteFromFIFO(NVMStripeBufferDescForFIFO *nvm_buf_hdr_fifo);
 static volatile void *moveToFIFOTail(NVMStripeBufferDescForFIFO *nvm_buf_hdr_fifo);
 
+extern void initNVMStripeBuffer();
+
 void initNVMStripeBufferForFIFO()
 {
+    initNVMStripeBuffer();
+
     nvm_stripe_control_fifo = (NVMStripeBufferControlForFIFO*)malloc(sizeof(NVMStripeBufferControlForFIFO));
     nvm_stripe_control_fifo->first_fifo = -1;
     nvm_stripe_control_fifo->last_fifo = -1;
@@ -73,6 +77,7 @@ NVMBufferDesc *getFIFOStripeBuffer(NVMBufferTag nvm_buf_tag)
             nvm_stripe_hdr = getFIFOStripe();
             nvmStripeTableInsert(nvm_buf_tag.stripe_id, hashcode, nvm_stripe_hdr->stripe_buf_id);
         }
+        nvm_buffer_control->first_freenvm = nvm_buf_hdr->next_freenvm;
         nvm_buf_hdr->next_freenvm = -1;
         nvm_buffer_control->n_usednvm++;
     } 
@@ -103,7 +108,7 @@ static NVMStripeBufferDesc *getFIFOStripe()
     }
     else {
         nvm_stripe_hdr = &nvm_stripe_descriptors[nvm_stripe_control_fifo->first_fifo];
-        nvm_stripe_hdr_fifo = &nvm_stripe_descriptors[nvm_stripe_control_fifo->first_fifo];
+        nvm_stripe_hdr_fifo = &nvm_stripe_descriptors_fifo[nvm_stripe_control_fifo->first_fifo];
         moveToFIFOTail(nvm_stripe_hdr_fifo);
         flushNVMStripeBuffer(nvm_stripe_hdr);
         unsigned long hashcode = nvmStripeTableHashCode(nvm_stripe_hdr->stripe_id);

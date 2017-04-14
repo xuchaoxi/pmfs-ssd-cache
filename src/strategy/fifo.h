@@ -12,7 +12,6 @@ typedef struct
 {
     long nvm_buf_id;
     long next_fifo;
-    long last_fifo;
 } NVMBufferDescForFIFO;
 
 typedef struct

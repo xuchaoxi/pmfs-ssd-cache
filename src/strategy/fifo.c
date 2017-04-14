@@ -28,24 +28,37 @@ void initNVMBufferForFIFO()
     {
         nvm_buf_hdr_fifo->nvm_buf_id = i;
         nvm_buf_hdr_fifo->next_fifo = -1;
-        nvm_buf_hdr_fifo->last_fifo = -1;
         nvm_buf_hdr_fifo++;
     }
 }
 
 static volatile void *addToFIFOTail(NVMBufferDescForFIFO *nvm_buf_hdr_fifo)
 {
-    nvm_buffer_descriptors_fifo[nvm_buffer_control_fifo->last_fifo].next_fifo = nvm_buf_hdr_fifo->nvm_buf_id;
-    nvm_buf_hdr_fifo->last_fifo = nvm_buffer_descriptors_fifo[nvm_buffer_control_fifo->last_fifo].nvm_buf_id;
-    nvm_buffer_control_fifo->last_fifo = nvm_buf_hdr_fifo->nvm_buf_id;
+    if(nvm_buffer_control->n_usednvm==0)
+    {
+        nvm_buffer_control_fifo->first_fifo = nvm_buf_hdr_fifo->nvm_buf_id;
+        nvm_buffer_control_fifo->last_fifo = nvm_buf_hdr_fifo->nvm_buf_id;
+    }
+    else {
+        nvm_buffer_descriptors_fifo[nvm_buffer_control_fifo->last_fifo].next_fifo = nvm_buf_hdr_fifo->nvm_buf_id;
+        nvm_buf_hdr_fifo->next_fifo = -1;
+        nvm_buffer_control_fifo->last_fifo = nvm_buf_hdr_fifo->nvm_buf_id;
+    }
     return NULL;
 }
 
 static volatile void *deleteFromFIFO(NVMBufferDescForFIFO *nvm_buf_hdr_fifo)
 {
-    nvm_buffer_control_fifo->first_fifo = nvm_buf_hdr_fifo->next_fifo;
-    nvm_buf_hdr_fifo->next_fifo = -1;
-    nvm_buffer_descriptors_fifo[nvm_buffer_control_fifo->first_fifo].last_fifo = -1;
+    
+    if(nvm_buf_hdr_fifo->next_fifo >= 0)
+    {
+        nvm_buffer_control_fifo->first_fifo = nvm_buf_hdr_fifo->next_fifo;
+        nvm_buf_hdr_fifo->next_fifo = -1;
+    }
+    else {
+        nvm_buffer_control_fifo->first_fifo = -1;
+        nvm_buffer_control_fifo->last_fifo = -1;
+    }
     return NULL;
 }
 
@@ -60,7 +73,7 @@ NVMBufferDesc *getFIFOBuffer()
 {
     NVMBufferDesc *nvm_buf_hdr;
     NVMBufferDescForFIFO *nvm_buf_hdr_fifo;
-    if(nvm_buffer_control->first_freenvm>=0)
+    if(nvm_buffer_control->first_freenvm >= 0)
     {
         nvm_buf_hdr = &nvm_buffer_descriptors[nvm_buffer_control->first_freenvm];
         nvm_buf_hdr_fifo = &nvm_buffer_descriptors_fifo[nvm_buffer_control->first_freenvm];
@@ -68,16 +81,15 @@ NVMBufferDesc *getFIFOBuffer()
         nvm_buf_hdr->next_freenvm = -1;
         addToFIFOTail(nvm_buf_hdr_fifo);
         nvm_buffer_control->n_usednvm++;
+        return nvm_buf_hdr;
     }
-    else {
-        nvm_buf_hdr = &nvm_buffer_descriptors[nvm_buffer_control_fifo->first_fifo];
-        nvm_buf_hdr_fifo = &nvm_buffer_descriptors_fifo[nvm_buffer_control_fifo->first_fifo];
-        moveToFIFOTail(nvm_buf_hdr_fifo); 
-        flushNVMBuffer(nvm_buf_hdr);
-        NVMBufferTag old_tag = nvm_buf_hdr->nvm_buf_tag; 
-        unsigned long old_hash = nvmBufferTableHashCode(&old_tag);
-        nvmBufferTableDelete(&old_tag, old_hash);
-    }
+    nvm_buf_hdr = &nvm_buffer_descriptors[nvm_buffer_control_fifo->first_fifo];
+    nvm_buf_hdr_fifo = &nvm_buffer_descriptors_fifo[nvm_buffer_control_fifo->first_fifo];
+    moveToFIFOTail(nvm_buf_hdr_fifo); 
+    flushNVMBuffer(nvm_buf_hdr);
+    NVMBufferTag old_tag = nvm_buf_hdr->nvm_buf_tag; 
+    unsigned long old_hash = nvmBufferTableHashCode(&old_tag);
+    nvmBufferTableDelete(&old_tag, old_hash);
     return nvm_buf_hdr;
 }
 
