@@ -14,7 +14,8 @@
 static volatile void *addToLRUStripeHead(NVMStripeBufferDescForLRU *nvm_buf_hdr_lru);
 static volatile void *deleteFromLRUStripe(NVMStripeBufferDescForLRU *nvm_buf_hdr_lru);
 static volatile void *moveToLRUStripeHead(NVMStripeBufferDescForLRU *nvm_buf_hdr_lru);
-static NVMStripeBufferDesc *getLRUStripe(NVMBufferTag nvm_buf_tag);
+
+static NVMStripeBufferDesc *getLRUStripe();
 
 void initNVMStripeBufferForLRU()
 {
@@ -95,7 +96,7 @@ NVMBufferDesc *getLRUStripeBuffer(NVMBufferTag nvm_buf_tag)
             moveToLRUStripeHead(nvm_stripe_hdr_lru);
         }
         else {
-            nvm_stripe_hdr = getLRUStripe(nvm_buf_tag);
+            nvm_stripe_hdr = getLRUStripe();
             nvmStripeTableInsert(nvm_buf_tag.stripe_id, hashcode, nvm_stripe_hdr->stripe_buf_id);
         }
     }
@@ -111,7 +112,7 @@ NVMBufferDesc *getLRUStripeBuffer(NVMBufferTag nvm_buf_tag)
     return nvm_buf_hdr;
 }
 
-NVMStripeBufferDesc *getLRUStripe(NVMBufferTag nvm_buf_tag)
+static NVMStripeBufferDesc *getLRUStripe()
 {
     NVMStripeBufferDescForLRU *nvm_stripe_hdr_lru;
     NVMStripeBufferDesc *nvm_stripe_hdr;

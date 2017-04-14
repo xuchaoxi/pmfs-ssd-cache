@@ -86,7 +86,8 @@ extern NVMStripeBufferControl *nvm_stripe_control;
 extern NVMStripeBufferBucket *nvm_stripe_table;
 
 extern unsigned long hit_num;
-extern unsigned long flush_nvm_blocks;
+extern unsigned long write_blocks;
+extern unsigned long flush_blocks;
 
 extern unsigned long NNVMBuffers;   // 50000
 extern unsigned long NNVMBufferTables;  // 50000

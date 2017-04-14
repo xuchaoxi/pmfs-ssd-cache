@@ -7,8 +7,9 @@
 
 #include<stdio.h>
 #include "nvm_cache.h"
-#include "nvm_buf_table.h"
 #include "nvm_stripe_table.h"
+
+static NVMStripeBufferDesc *getFIFOStripe();
 
 void initNVMStripeBufferForFIFO()
 {
@@ -27,15 +28,9 @@ NVMBufferDesc *getFIFOStripeBuffer(NVMBufferTag nvm_buf_tag)
         // miss in stripe buffer
         if(stripe_buf_id < 0)
         {
-            nvm_stripe_hdr = &nvm_stripe_descriptors[nvm_stripe_control->first_freebuf];
-            nvm_stripe_control->first_freebuf = nvm_stripe_hdr->next_freebuf;
-            nvm_stripe_control->n_usedbuf++;
-            nvm_stripe_hdr->next_freebuf = -1;
-           // nvmStripeTableInsert(nvm_buf_tag.stripe_id, hashcode, nvm_stripe_hdr->stripe_buf_id);
+            nvm_stripe_hdr = getFIFOStripe();
+            nvmStripeTableInsert(nvm_buf_tag.stripe_id, hashcode, nvm_stripe_hdr->stripe_buf_id);
         }
-        nvm_buffer_control->first_freenvm = nvm_buf_hdr->next_freenvm;
-        nvm_buf_hdr->next_freenvm = -1;
-        nvm_buffer_control->n_usednvm++;
     } 
     else {
         nvm_stripe_hdr = &nvm_stripe_descriptors[nvm_stripe_control->last_freebuf];
@@ -45,6 +40,27 @@ NVMBufferDesc *getFIFOStripeBuffer(NVMBufferTag nvm_buf_tag)
         nvm_buf_hdr = &nvm_buffer_descriptors[nvm_buffer_control->first_freenvm];
     }
     return nvm_buf_hdr;
+}
+
+static NVMStripeBufferDesc *getFIFOStripe()
+{
+    NVMStripeBufferDesc *nvm_stripe_hdr;
+    if(nvm_stripe_control->first_freebuf >= 0)
+    {
+        nvm_stripe_hdr = &nvm_stripe_descriptors[nvm_stripe_control->first_freebuf];
+
+        nvm_stripe_control->first_freebuf = nvm_stripe_hdr->next_freebuf;
+        nvm_stripe_hdr->next_freebuf = -1;
+
+        nvm_stripe_control->n_usedbuf++;
+    }
+    else {
+        nvm_stripe_hdr = &nvm_stripe_descriptors[nvm_stripe_control->last_freebuf];
+        flushNVMStripeBuffer(nvm_stripe_hdr);
+        unsigned long hashcode = nvmStripeTableHashCode(nvm_stripe_hdr->stripe_id);
+        nvmStripeTableDelete(nvm_stripe_hdr->stripe_id, hashcode);
+    }
+    return nvm_stripe_hdr;
 }
 
 void *hitInFIFOStripeBuffer(NVMBufferDesc *nvm_buf_hdr)

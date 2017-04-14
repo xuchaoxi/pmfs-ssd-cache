@@ -7,6 +7,23 @@
 
 #ifndef _FIFO_H
 #define _FIFO_H
+
+typedef struct 
+{
+    long nvm_buf_id;
+    long next_fifo;
+    long last_fifo;
+} NVMBufferDescForFIFO;
+
+typedef struct
+{
+    long first_fifo;
+    long last_fifo;
+} NVMBufferControlForFIFO;
+
+NVMBufferDescForFIFO *nvm_buffer_descriptors_fifo;
+NVMBufferControlForFIFO *nvm_buffer_control_fifo;
+
 extern void initNVMBufferForFIFO();
 extern NVMBufferDesc *getFIFOBuffer();
 extern void *hitInFIFOBuffer(NVMBufferDesc *nvm_buf_hdr);

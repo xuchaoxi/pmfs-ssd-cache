@@ -26,8 +26,6 @@ typedef struct
 NVMBufferDescForLRU *nvm_buffer_descriptors_lru;
 NVMBufferControlForLRU *nvm_buffer_control_lru;
 
-extern unsigned long flush_fifo_times;
-
 extern void initNVMBufferForLRU();
 extern void *hitInLRUBuffer(NVMBufferDesc *nvm_buf_hdr);
 extern NVMBufferDesc *getLRUBuffer();

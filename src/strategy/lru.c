@@ -32,7 +32,6 @@ void initNVMBufferForLRU()
         nvm_buf_hdr_lru->last_lru = -1;
         ++nvm_buf_hdr_lru;
     }
-    flush_fifo_times = 0;
 }
 
 static volatile void *addToLRUHead(NVMBufferDescForLRU *nvm_buf_hdr_lru)
@@ -92,13 +91,12 @@ NVMBufferDesc *getLRUBuffer()
         nvm_buffer_control->n_usednvm++;
         return nvm_buf_hdr;
     }
-    flush_fifo_times++;
     nvm_buf_hdr = &nvm_buffer_descriptors[nvm_buffer_control_lru->last_lru];
     nvm_buf_hdr_lru = &nvm_buffer_descriptors_lru[nvm_buffer_control_lru->last_lru];
     moveToLRUHead(nvm_buf_hdr_lru);
     
-    NVMBufferTag old_tag = nvm_buf_hdr->nvm_buf_tag;
     flushNVMBuffer(nvm_buf_hdr);
+    NVMBufferTag old_tag = nvm_buf_hdr->nvm_buf_tag;
     unsigned long old_hash = nvmBufferTableHashCode(&old_tag);
     nvmBufferTableDelete(&old_tag, old_hash);
     return nvm_buf_hdr;

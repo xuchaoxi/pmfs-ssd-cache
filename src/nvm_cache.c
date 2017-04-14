@@ -48,7 +48,8 @@ void initNVMBuffer()
     nvm_buf_hdr[NNVMBuffers-1].next_freenvm = -1;
 
     hit_num = 0;
-    flush_nvm_blocks = 0;
+    write_blocks = 0;
+    flush_blocks = 0;
 }
 
 // stripe buffer
@@ -105,7 +106,7 @@ static void *hitInNVMBuffer(NVMBufferDesc *nvm_buf_hdr, NVMEvictionStrategy stra
 {
     if(strategy==LRU)
         hitInLRUBuffer(nvm_buf_hdr);
-    if(strategy==LRUSTRIPE);
+    if(strategy==LRUSTRIPE)
         hitInLRUStripeBuffer(nvm_buf_hdr);
     if(strategy==FIFO)
         hitInFIFOBuffer(nvm_buf_hdr);
@@ -164,7 +165,6 @@ void *flushNVMBuffer(NVMBufferDesc *nvm_buf_hdr)
         exit(0);
     }
     ret = writeOrReadPage(data_id, ssd_offset, nvm_buffer, 1);
-        return nvm_buf_hdr;
     if(ret < 0)
     {
         perror("[ERROR]:");
@@ -181,7 +181,7 @@ void *flushNVMBuffer(NVMBufferDesc *nvm_buf_hdr)
         exit(0);
     }
     free(nvm_buffer);
-    flush_nvm_blocks++;
+    flush_blocks += 2;
     return NULL;
 }
 
@@ -264,7 +264,6 @@ void read_block(off_t offset, char* nvm_buffer)
             perror("[ERROR]");
             exit(0);
         }
-        flush_nvm_blocks++;
     }
 }
 
@@ -285,9 +284,9 @@ void write_block(off_t offset, char *nvm_buffer)
     if(DEBUG)
         printf("[INFO] write()----offset=%lu\n", offset);
     nvm_buf_hdr = NVMBufferAlloc(nvm_buf_tag, &found);
-    flush_nvm_blocks++;
-    if(flush_nvm_blocks%10000==0)
-        printf("hit num:%lu  flush_nvm_blocks:%lu flush_fifo_blocks:\n", hit_num, flush_nvm_blocks);
+    write_blocks++;
+    if(write_blocks%10000==0)
+        printf("hit num:%lu  write_blocks:%lu flush_blocks:%lu\n", hit_num, write_blocks, flush_blocks);
     ret = pwrite(nvm_fd, nvm_buffer, NVM_BUFFER_SIZE, nvm_buf_hdr->nvm_buf_id*NVM_BUFFER_SIZE);
     if(ret < 0)
     {

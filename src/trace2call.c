@@ -60,7 +60,8 @@ void trace_to_iocall(char *trace_file)
     gettimeofday(&tv_now, &tz_now);
     time_now = tv_now.tv_sec + tv_now.tv_usec / 1000000.0;
     printf("total_run_time=%lfs, ",time_now - time_begin);
-    printf("hit_num=%lu,", hit_num);
+    printf("hit_num=%lu, write_blocks=%lu, flush_blocks=%lu\n", hit_num, write_blocks, flush_blocks);
+    printf("hit_rate = %lf\n", hit_num*1.0 / write_blocks);
     
     free(nvm_buffer);
 //    close(trace);
