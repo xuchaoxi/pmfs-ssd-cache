@@ -198,30 +198,26 @@ void *flushNVMStripeBuffer(NVMStripeBufferDesc *nvm_stripe_hdr)
         unsigned long hashcode = nvmBufferTableHashCode(&nvm_buf_tag);
         long nvm_buf_id = nvmBufferTableLookup(&nvm_buf_tag, hashcode);
         // nvm buffer exist
-        if(nvm_buf_id >= 0 && firstOrlast==0)
+        if(nvm_buf_id >= 0)
         {
             NVMBufferDesc *nvm_buf_hdr = &nvm_buffer_descriptors[nvm_buf_id];
-            nvm_buffer_control->first_freenvm = nvm_buf_hdr->nvm_buf_id;
-            nvm_buffer_descriptors[nvm_buf_id].next_freenvm = -1;
-            nvm_buffer_control->n_usednvm--;
-            firstOrlast = 1;
-            flushNVMBuffer(nvm_buf_hdr);
-        }
-        if(nvm_buf_id >= 0 && firstOrlast==1)
-        {
-            NVMBufferDesc *nvm_buf_hdr = &nvm_buffer_descriptors[nvm_buf_id];
-            nvm_buf_hdr->next_freenvm = nvm_buffer_descriptors[nvm_buffer_control->first_freenvm].next_freenvm;
-            nvm_buffer_descriptors[nvm_buffer_control->first_freenvm].next_freenvm = nvm_buf_hdr->nvm_buf_id;
+            if(firstOrlast==0)
+            {
+                nvm_buffer_control->first_freenvm = nvm_buf_hdr->nvm_buf_id;
+                nvm_buffer_control->last_freenvm = nvm_buf_hdr->nvm_buf_id;
+                nvm_buf_hdr->next_freenvm = -1;
+                firstOrlast++;
+            }
+            else if(firstOrlast > 0)
+            {
+                nvm_buffer_descriptors[nvm_buffer_control->last_freenvm].next_freenvm = nvm_buf_id;
+                nvm_buf_hdr->next_freenvm = -1;
+                nvm_buffer_control->last_freenvm = nvm_buf_id;
+            }
             nvm_buffer_control->n_usednvm--;
             flushNVMBuffer(nvm_buf_hdr);
         }
     }
-    long id = nvm_buffer_control->first_freenvm;
-    while(nvm_buffer_descriptors[id].next_freenvm != -1)
-    {
-        id = nvm_buffer_descriptors[id].next_freenvm;
-    }
-    nvm_buffer_control->last_freenvm = id;
     return NULL;
 }
 
