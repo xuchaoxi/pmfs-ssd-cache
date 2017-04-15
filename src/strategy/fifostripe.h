@@ -24,6 +24,9 @@ typedef struct
 NVMStripeBufferDescForFIFO *nvm_stripe_descriptors_fifo;
 NVMStripeBufferControlForFIFO *nvm_stripe_control_fifo;
 
+long head;
+long tail;
+
 extern void initNVMStripeBufferForFIFO();
 extern NVMBufferDesc *getFIFOStripeBuffer(NVMBufferTag nvm_buf_tag);
 extern void *hitInFIFOStripeBuffer(NVMBufferDesc *nvm_buf_hdr);
