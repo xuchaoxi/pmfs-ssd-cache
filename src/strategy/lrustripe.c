@@ -56,6 +56,7 @@ static volatile void *addToLRUStripeHead(NVMStripeBufferDescForLRU *nvm_buf_hdr_
 
 static volatile void *deleteFromLRUStripe(NVMStripeBufferDescForLRU *nvm_buf_hdr_lru)
 {
+
     if(nvm_buf_hdr_lru->last_lru >= 0)
     {
         nvm_stripe_descriptors_lru[nvm_buf_hdr_lru->last_lru].next_lru = nvm_buf_hdr_lru->next_lru;
@@ -75,8 +76,11 @@ static volatile void *deleteFromLRUStripe(NVMStripeBufferDescForLRU *nvm_buf_hdr
 
 static volatile void *moveToLRUStripeHead(NVMStripeBufferDescForLRU *nvm_buf_hdr_lru)
 {
-    deleteFromLRUStripe(nvm_buf_hdr_lru);
-    addToLRUStripeHead(nvm_buf_hdr_lru);
+    if(nvm_stripe_control->n_usedbuf > 1)
+    {
+        deleteFromLRUStripe(nvm_buf_hdr_lru);
+        addToLRUStripeHead(nvm_buf_hdr_lru);
+    }
     return NULL;
 }
 
@@ -100,6 +104,7 @@ NVMBufferDesc *getLRUStripeBuffer(NVMBufferTag nvm_buf_tag)
         else {
             nvm_stripe_hdr = getLRUStripe();
             nvmStripeTableInsert(nvm_buf_tag.stripe_id, hashcode, nvm_stripe_hdr->stripe_buf_id);
+            nvm_stripe_hdr->stripe_id = nvm_buf_tag.stripe_id;
         }
         nvm_buffer_control->first_freenvm = nvm_buf_hdr->next_freenvm;
         nvm_buf_hdr->next_freenvm = -1;
@@ -107,13 +112,21 @@ NVMBufferDesc *getLRUStripeBuffer(NVMBufferTag nvm_buf_tag)
     }
     else { // no free buffer
         nvm_stripe_hdr = &nvm_stripe_descriptors[nvm_stripe_control_lru->last_lru];
+      //  printf("last_lru=%ld\n",nvm_stripe_control_lru->last_lru);
+    //    printf("stripe_id=%ld, stripe_buf_id=%ld, next_free=%ld\n",nvm_stripe_hdr->stripe_id, stripe_buf_id, nvm_stripe_hdr->next_freebuf);
         nvm_stripe_hdr_lru = &nvm_stripe_descriptors_lru[nvm_stripe_control_lru->last_lru];
         moveToLRUStripeHead(nvm_stripe_hdr_lru);
         flushNVMStripeBuffer(nvm_stripe_hdr);
         unsigned long oldhash = nvmStripeTableHashCode(nvm_stripe_hdr->stripe_id);
         nvmStripeTableDelete(nvm_stripe_hdr->stripe_id, oldhash);
+ 
         nvm_buf_hdr = &nvm_buffer_descriptors[nvm_buffer_control->first_freenvm];
+        nvm_buffer_control->first_freenvm = nvm_buf_hdr->next_freenvm;
+        nvm_buf_hdr->next_freenvm = -1;
+        nvm_buffer_control->n_usednvm++;
     } 
+    //sleep(2);
+        //printf("first_lru=%ld, last_lru=%ld\n",nvm_stripe_control_lru->first_lru, nvm_stripe_control_lru->last_lru);
     return nvm_buf_hdr;
 }
 

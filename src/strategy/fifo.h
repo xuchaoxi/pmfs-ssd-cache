@@ -23,6 +23,8 @@ typedef struct
 NVMBufferDescForFIFO *nvm_buffer_descriptors_fifo;
 NVMBufferControlForFIFO *nvm_buffer_control_fifo;
 
+long head, tail;
+
 extern void initNVMBufferForFIFO();
 extern NVMBufferDesc *getFIFOBuffer();
 extern void *hitInFIFOBuffer(NVMBufferDesc *nvm_buf_hdr);

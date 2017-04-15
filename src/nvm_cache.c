@@ -188,10 +188,10 @@ void *flushNVMBuffer(NVMBufferDesc *nvm_buf_hdr)
 void *flushNVMStripeBuffer(NVMStripeBufferDesc *nvm_stripe_hdr)
 {
     long stripe_id = nvm_stripe_hdr->stripe_id;
-    off_t page_id = stripe_id * N;   // 4 if parity not in cache
+    off_t page_id = stripe_id * (N + 1) ;   // raid page id
     int i = 0;
     int firstOrlast = 0;
-    for(i = 0; i < N ;++i)
+    for(i = 0; i < N+1 ;++i)
     {
         NVMBufferTag nvm_buf_tag;
         nvm_buf_tag.offset = page_id + i;

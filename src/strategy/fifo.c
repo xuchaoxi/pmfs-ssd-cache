@@ -17,6 +17,9 @@ static volatile void *moveToFIFOTail(NVMBufferDescForFIFO *nvm_buf_hdr_fifo);
 
 void initNVMBufferForFIFO()
 {
+    head = 0;
+    tail = 0;
+    /*
     nvm_buffer_control_fifo = (NVMBufferControlForFIFO*)malloc(sizeof(NVMBufferControlForFIFO));
     nvm_buffer_control_fifo->first_fifo = -1;
     nvm_buffer_control_fifo->last_fifo = -1;
@@ -30,6 +33,7 @@ void initNVMBufferForFIFO()
         nvm_buf_hdr_fifo->next_fifo = -1;
         nvm_buf_hdr_fifo++;
     }
+    */
 }
 
 static volatile void *addToFIFOTail(NVMBufferDescForFIFO *nvm_buf_hdr_fifo)
@@ -64,28 +68,33 @@ static volatile void *deleteFromFIFO(NVMBufferDescForFIFO *nvm_buf_hdr_fifo)
 
 static volatile void *moveToFIFOTail(NVMBufferDescForFIFO *nvm_buf_hdr_fifo)
 {
-    deleteFromFIFO(nvm_buf_hdr_fifo);
-    addToFIFOTail(nvm_buf_hdr_fifo);
+    if(nvm_buffer_control->n_usednvm > 1)
+    {
+        deleteFromFIFO(nvm_buf_hdr_fifo);
+        addToFIFOTail(nvm_buf_hdr_fifo);
+    }
     return NULL;
 }
 
 NVMBufferDesc *getFIFOBuffer()
 {
     NVMBufferDesc *nvm_buf_hdr;
-    NVMBufferDescForFIFO *nvm_buf_hdr_fifo;
+   // NVMBufferDescForFIFO *nvm_buf_hdr_fifo;
     if(nvm_buffer_control->first_freenvm >= 0)
     {
         nvm_buf_hdr = &nvm_buffer_descriptors[nvm_buffer_control->first_freenvm];
-        nvm_buf_hdr_fifo = &nvm_buffer_descriptors_fifo[nvm_buffer_control->first_freenvm];
+        //nvm_buf_hdr_fifo = &nvm_buffer_dscriptors_fifo[nvm_buffer_control->first_freenvm];
+        tail = (tail + 1)%NNVMBuffers;
         nvm_buffer_control->first_freenvm = nvm_buf_hdr->next_freenvm;
         nvm_buf_hdr->next_freenvm = -1;
-        addToFIFOTail(nvm_buf_hdr_fifo);
+     //   addToFIFOTail(nvm_buf_hdr_fifo);
         nvm_buffer_control->n_usednvm++;
         return nvm_buf_hdr;
     }
-    nvm_buf_hdr = &nvm_buffer_descriptors[nvm_buffer_control_fifo->first_fifo];
-    nvm_buf_hdr_fifo = &nvm_buffer_descriptors_fifo[nvm_buffer_control_fifo->first_fifo];
-    moveToFIFOTail(nvm_buf_hdr_fifo); 
+    nvm_buf_hdr = &nvm_buffer_descriptors[head];
+    head = (head+1)%NNVMBuffers;
+//    nvm_buf_hdr_fifo = &nvm_buffer_descriptors_fifo[nvm_buffer_control_fifo->first_fifo];
+ //   moveToFIFOTail(nvm_buf_hdr_fifo); 
     flushNVMBuffer(nvm_buf_hdr);
     NVMBufferTag old_tag = nvm_buf_hdr->nvm_buf_tag; 
     unsigned long old_hash = nvmBufferTableHashCode(&old_tag);
