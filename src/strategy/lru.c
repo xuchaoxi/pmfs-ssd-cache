@@ -72,8 +72,11 @@ static volatile void *deleteFromLRU(NVMBufferDescForLRU *nvm_buf_hdr_lru)
 
 static volatile void *moveToLRUHead(NVMBufferDescForLRU *nvm_buf_hdr_lru)
 {
-    deleteFromLRU(nvm_buf_hdr_lru);
-    addToLRUHead(nvm_buf_hdr_lru);
+    if(nvm_buffer_control->n_usednvm > 1)
+    {
+        deleteFromLRU(nvm_buf_hdr_lru);
+        addToLRUHead(nvm_buf_hdr_lru);
+    }
     return NULL;
 }
 
