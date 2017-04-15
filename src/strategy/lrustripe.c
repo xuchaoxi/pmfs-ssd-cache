@@ -112,8 +112,6 @@ NVMBufferDesc *getLRUStripeBuffer(NVMBufferTag nvm_buf_tag)
     }
     else { // no free buffer
         nvm_stripe_hdr = &nvm_stripe_descriptors[nvm_stripe_control_lru->last_lru];
-      //  printf("last_lru=%ld\n",nvm_stripe_control_lru->last_lru);
-    //    printf("stripe_id=%ld, stripe_buf_id=%ld, next_free=%ld\n",nvm_stripe_hdr->stripe_id, stripe_buf_id, nvm_stripe_hdr->next_freebuf);
         nvm_stripe_hdr_lru = &nvm_stripe_descriptors_lru[nvm_stripe_control_lru->last_lru];
         moveToLRUStripeHead(nvm_stripe_hdr_lru);
         flushNVMStripeBuffer(nvm_stripe_hdr);
@@ -125,8 +123,6 @@ NVMBufferDesc *getLRUStripeBuffer(NVMBufferTag nvm_buf_tag)
         nvm_buf_hdr->next_freenvm = -1;
         nvm_buffer_control->n_usednvm++;
     } 
-    //sleep(2);
-        //printf("first_lru=%ld, last_lru=%ld\n",nvm_stripe_control_lru->first_lru, nvm_stripe_control_lru->last_lru);
     return nvm_buf_hdr;
 }
 
