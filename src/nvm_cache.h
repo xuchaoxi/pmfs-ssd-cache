@@ -34,7 +34,8 @@ typedef struct
 } NVMBufferDesc;
 
 typedef enum {
-    ClOCK = 0,
+    CLOCK = 0,
+    CLOCKSTRIPE,
     LRU,
     LRUSTRIPE,
     FIFO,

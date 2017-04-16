@@ -13,6 +13,8 @@
 #include "nvm_cache.h"
 #include "nvm_buf_table.h"
 #include "nvm_stripe_table.h"
+#include "strategy/clock.h"
+#include "strategy/clockstripe.h"
 #include "strategy/lru.h"
 #include "strategy/lrustripe.h"
 #include "strategy/fifo.h"
@@ -86,11 +88,19 @@ static void *initStrategyNVMBuffer(NVMEvictionStrategy strategy)
         initNVMBufferForFIFO();
     if(strategy==FIFOSTRIPE)
         initNVMStripeBufferForFIFO();
+    if(strategy==CLOCK)
+        initNVMBufferForCLOCK();
+    if(strategy==CLOCKSTRIPE)
+        initNVMStripeBufferForClock();
     return NULL;
 }
 
 static NVMBufferDesc *getStrategyNVMBuffer(NVMBufferTag nvm_buf_tag, NVMEvictionStrategy strategy)
 {
+    if(strategy==CLOCK)
+        return getCLOCKBuffer();
+    if(strategy==CLOCKSTRIPE)
+        return getCLOCKStripeBuffer(nvm_buf_tag);
     if(strategy==LRU)
         return getLRUBuffer();
     if(strategy==LRUSTRIPE)
@@ -112,6 +122,10 @@ static void *hitInNVMBuffer(NVMBufferDesc *nvm_buf_hdr, NVMEvictionStrategy stra
         hitInFIFOBuffer(nvm_buf_hdr);
     if(strategy==FIFOSTRIPE)
         hitInFIFOStripeBuffer(nvm_buf_hdr);
+    if(strategy==CLOCK)
+        hitInCLOCKBuffer(nvm_buf_hdr);
+    if(strategy==CLOCKSTRIPE)
+        hitInCLOCKStripeBuffer(nvm_buf_hdr);
     return NULL;
 }
 
