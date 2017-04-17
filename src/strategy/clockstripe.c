@@ -20,6 +20,7 @@ void initNVMStripeBufferForClock()
     initNVMStripeBuffer();
     nvm_stripe_control_clock = (NVMStripeControlForClock*)malloc(sizeof(NVMStripeControlForClock));
     nvm_stripe_control_clock->next_evict = 0;
+    nvm_stripe_descriptors_clock = (NVMStripeBufferDescForClock*)malloc(sizeof(NVMStripeBufferDescForClock)*STRIPES);
 
     NVMStripeBufferDescForClock *nvm_stripe_hdr = nvm_stripe_descriptors_clock;
     long i;
@@ -114,9 +115,10 @@ static NVMStripeBufferDesc *evictCLOCKStripeBuffer()
             flushNVMStripeBuffer(nvm_stripe_hdr);
             unsigned long oldhash = nvmStripeTableHashCode(nvm_stripe_hdr->stripe_id);
             nvmStripeTableDelete(nvm_stripe_hdr->stripe_id, oldhash);
+            return nvm_stripe_hdr;
         }
     }
-    return nvm_stripe_hdr;
+    return NULL;
 }
 
 

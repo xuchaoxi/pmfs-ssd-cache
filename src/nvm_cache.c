@@ -125,7 +125,7 @@ static void *hitInNVMBuffer(NVMBufferDesc *nvm_buf_hdr, NVMEvictionStrategy stra
     if(strategy==CLOCK)
         hitInCLOCKBuffer(nvm_buf_hdr);
     if(strategy==CLOCKSTRIPE)
-        hitInCLOCKStripeBuffer(nvm_buf_hdr);
+//        hitInCLOCKStripeBuffer(nvm_buf_hdr);
     return NULL;
 }
 
