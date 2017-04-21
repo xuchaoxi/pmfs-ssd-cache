@@ -10,7 +10,7 @@ endif
 CFLAGS += -Wall
 CPPFLAGS += -I$(NVM_SSD_CACHE_DIR) -I$(NVM_SSD_CACHE_DIR)/strategy -I$(NVM_SSD_CACHE_DIR)/raid
 
-OBJS = main.o raid_5.o global.o nvm_buf_table.o nvm_cache.o trace2call.o lru.o lrustripe.o fifo.o nvm_stripe_table.o fifostripe.o clock.o clockstripe.o
+OBJS = main.o raid_5.o global.o nvm_buf_table.o nvm_cache.o trace2call.o lru.o lrustripe.o fifo.o nvm_stripe_table.o fifostripe.o clock.o clockstripe.o scan.o
 
 all: $(OBJS) nvm-ssd-cache
 	@echo 'Bulid Successfully nvm-ssd-cache...'
@@ -55,6 +55,9 @@ clock.o: strategy/clock.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $?
 
 clockstripe.o: strategy/clockstripe.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $?
+
+scan.o: strategy/scan.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $?
 
 .PHONY:clean

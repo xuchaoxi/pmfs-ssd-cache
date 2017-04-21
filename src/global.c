@@ -26,11 +26,11 @@ long global_stripe_id;
 char *page_buf;
 
 
-unsigned long NNVMBuffers = 500000;
-unsigned long NNVMBufferTables = 500000;
-unsigned long STRIPES = 500000;
+unsigned long NNVMBuffers = 5000;
+unsigned long NNVMBufferTables = 5000;
+unsigned long STRIPES = 10;
 
-NVMEvictionStrategy EvictStrategy = FIFO;
+NVMEvictionStrategy EvictStrategy = LRU;
 
 int nvm_fd;
 int ssd0_fd;
@@ -49,8 +49,12 @@ char ssd4_device[] = "/home/xcx/design/device/ssd4";
 
 
 unsigned long hit_num;
+unsigned long hit_parity;
+unsigned long hit_data;
 unsigned long write_blocks;
 unsigned long flush_blocks;
+unsigned long flush_data;
+unsigned long flush_parity;
 
 NVMBufferDesc *nvm_buffer_descriptors;
 NVMBufferControl *nvm_buffer_control;

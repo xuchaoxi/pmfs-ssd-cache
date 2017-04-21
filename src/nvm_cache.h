@@ -39,7 +39,8 @@ typedef enum {
     LRU,
     LRUSTRIPE,
     FIFO,
-    FIFOSTRIPE
+    FIFOSTRIPE,
+    SCAN
 }NVMEvictionStrategy;
 
 typedef struct NVMBufferHashBucket
@@ -87,8 +88,12 @@ extern NVMStripeBufferControl *nvm_stripe_control;
 extern NVMStripeBufferBucket *nvm_stripe_table;
 
 extern unsigned long hit_num;
+extern unsigned long hit_parity;
+extern unsigned long hit_data;
 extern unsigned long write_blocks;
 extern unsigned long flush_blocks;
+extern unsigned long flush_data;
+extern unsigned long flush_parity;
 
 extern unsigned long NNVMBuffers;   // 50000
 extern unsigned long NNVMBufferTables;  // 50000
@@ -100,7 +105,7 @@ extern unsigned long STRIPES;  // 50000
 
 extern void initNVMBuffer();
 extern void read_block(off_t offset, char* nvm_buffer);
-extern void write_block(off_t offset, char* nvm_buffer);
+extern void write_block(off_t offset, char* nvm_buffer, int flag);
 extern void *flushNVMBuffer(NVMBufferDesc *nvm_buf_hdr);
 extern void *flushNVMStripeBuffer(NVMStripeBufferDesc *nvm_buf_hdr);
 

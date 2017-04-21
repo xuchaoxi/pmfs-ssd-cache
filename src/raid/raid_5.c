@@ -91,22 +91,23 @@ int writeOrReadPage(int ssd_id, off_t offset, char *buffer, int flag)
         case 4 : ssd_path = ssd4_device;
                  break;
     }
-    int ssdfd = open(ssd_path, O_WRONLY | O_DIRECT);
+/*    int ssdfd = open(ssd_path, O_WRONLY | O_DIRECT);
     if(ssdfd < 0)
     {
         perror("[ERROR]:Fail to open ssd device");
         exit(0);
     }
+    */
 //    initPageBuffer();
  
     // ssd_page_offset 
  //   off_t offset = global_stripe_id*PAGENUM +  page_off;
     
     int code;
-    if(flag==1)
-        code = pwrite(ssdfd, buffer, PAGESIZE, offset*PAGESIZE);   
-    else if(flag==0)
-        code = pread(ssdfd, buffer, PAGENUM, offset*PAGESIZE);
+   // if(flag==1)
+  //      code = pwrite(ssdfd, buffer, PAGESIZE, offset*PAGESIZE);   
+ //   else if(flag==0)
+    //    code = pread(ssdfd, buffer, PAGENUM, offset*PAGESIZE);
 /*
     if(code < 0)
     {
@@ -114,7 +115,7 @@ int writeOrReadPage(int ssd_id, off_t offset, char *buffer, int flag)
         exit(0);
     }
 */
-    close(ssdfd);
+    //close(ssdfd);
     return code;
 }
 

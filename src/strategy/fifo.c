@@ -79,22 +79,17 @@ static volatile void *moveToFIFOTail(NVMBufferDescForFIFO *nvm_buf_hdr_fifo)
 NVMBufferDesc *getFIFOBuffer()
 {
     NVMBufferDesc *nvm_buf_hdr;
-   // NVMBufferDescForFIFO *nvm_buf_hdr_fifo;
     if(nvm_buffer_control->first_freenvm >= 0)
     {
         nvm_buf_hdr = &nvm_buffer_descriptors[nvm_buffer_control->first_freenvm];
-        //nvm_buf_hdr_fifo = &nvm_buffer_dscriptors_fifo[nvm_buffer_control->first_freenvm];
         tail = (tail + 1)%NNVMBuffers;
         nvm_buffer_control->first_freenvm = nvm_buf_hdr->next_freenvm;
         nvm_buf_hdr->next_freenvm = -1;
-     //   addToFIFOTail(nvm_buf_hdr_fifo);
         nvm_buffer_control->n_usednvm++;
         return nvm_buf_hdr;
     }
     nvm_buf_hdr = &nvm_buffer_descriptors[head];
     head = (head+1)%NNVMBuffers;
-//    nvm_buf_hdr_fifo = &nvm_buffer_descriptors_fifo[nvm_buffer_control_fifo->first_fifo];
- //   moveToFIFOTail(nvm_buf_hdr_fifo); 
     flushNVMBuffer(nvm_buf_hdr);
     NVMBufferTag old_tag = nvm_buf_hdr->nvm_buf_tag; 
     unsigned long old_hash = nvmBufferTableHashCode(&old_tag);

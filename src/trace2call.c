@@ -43,12 +43,15 @@ void trace_to_iocall(char *trace_file)
  //       time_now = tv_now.tv_sec + tv_now.tv.usec / 1000000.0;
             execute(offset);
             off_t data_global_offset = data_raid_offset;
+            off_t parity_global_offset = parity_raid_offset;
 //            off_t parity_global_offset = parity_raid_offset;
             for(i = 0;i < PAGESIZE;++i)
                 nvm_buffer[i] = '0';
   //          if(action=='1')
             {
-                write_block(data_global_offset, nvm_buffer);
+                write_block(data_global_offset, nvm_buffer, 1);
+                write_block(parity_global_offset, nvm_buffer, 0);
+            //    write_block(parity_global_offset, nvm_buffer, 0);
             //    write_block(parity_global_offset, nvm_buffer);
             }
     //        else
@@ -60,9 +63,9 @@ void trace_to_iocall(char *trace_file)
     gettimeofday(&tv_now, &tz_now);
     time_now = tv_now.tv_sec + tv_now.tv_usec / 1000000.0;
     printf("total_run_time=%lfs, ",time_now - time_begin);
-    printf("hit_num=%lu, write_blocks=%lu, flush_blocks=%lu\n", hit_num, write_blocks, flush_blocks);
-    printf("hit_rate = %lf\n", hit_num*1.0 / write_blocks);
-    
+    printf("hit_num=%lu, write_blocks=%lu, flush_blocks=%lu, hit_rate=%lf\n", hit_num, write_blocks, flush_blocks,hit_num*1.0 / write_blocks);
+    printf("hit_data=%lu, hit_data_rate=%lf, hit_parity=%lu, hit_parity_rate=%lf\n", hit_data, hit_data*1.0/write_blocks, hit_parity, hit_parity*1.0 / write_blocks);
+    printf("flush_data=%lu, flush_parity=%lu\n", flush_data, flush_parity);
     free(nvm_buffer);
 //    close(trace);
 }
