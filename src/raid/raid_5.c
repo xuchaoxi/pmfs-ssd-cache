@@ -42,8 +42,8 @@ void execute(off_t offset)
     block_offset_stripe = offset % N;
     data_ssd_id = (block_offset_stripe >= parity_ssd_id) ? block_offset_stripe+1 : block_offset_stripe;
     // offset map in global raid address
-    data_raid_offset = (global_stripe_id * (N+1)) + data_ssd_id;
-    parity_raid_offset = (global_stripe_id * (N+1)) + parity_ssd_id;
+    data_raid_offset = ((global_stripe_id+1) * (N+1)) + data_ssd_id;
+    parity_raid_offset = ((global_stripe_id+1) * (N+1)) + parity_ssd_id;
     ssd_page_off = global_stripe_id;
 
 /*  old 

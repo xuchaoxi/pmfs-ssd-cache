@@ -53,10 +53,12 @@ void initNVMBuffer()
     hit_num = 0;
     hit_data = 0;
     hit_parity = 0;
+    hit_stripe = 0;
     write_blocks = 0;
     flush_blocks = 0;
     flush_data = 0;
     flush_parity = 0;
+    flush_stripe = 0;
 }
 
 // stripe buffer
@@ -223,9 +225,10 @@ void *flushNVMBuffer(NVMBufferDesc *nvm_buf_hdr)
 void *flushNVMStripeBuffer(NVMStripeBufferDesc *nvm_stripe_hdr)
 {
     long stripe_id = nvm_stripe_hdr->stripe_id;
-    off_t page_id = stripe_id * (N + 1) ;   // raid page id
+    off_t page_id = (stripe_id +1)* (N + 1) ;   // raid page id
     int i = 0;
     int firstOrlast = 0;
+    flush_stripe++;
     for(i = 0; i < N+1 ;++i)
     {
         NVMBufferTag nvm_buf_tag;
@@ -251,6 +254,9 @@ void *flushNVMStripeBuffer(NVMStripeBufferDesc *nvm_stripe_hdr)
             }
             nvm_buffer_control->n_usednvm--;
             flushNVMBuffer(nvm_buf_hdr);
+//            NVMBufferTag old_tag = nvm_buf_hdr->nvm_buf_tag;
+  //          unsigned long old_hash = nvmBufferTableHashCode(&old_tag);
+            nvmBufferTableDelete(&nvm_buf_tag, hashcode);
         }
     }
     return NULL;
@@ -319,8 +325,8 @@ void write_block(off_t offset, char *nvm_buffer, int flag)
         printf("[INFO] write()----offset=%lu\n", offset);
     nvm_buf_hdr = NVMBufferAlloc(nvm_buf_tag, &found);
     write_blocks++;
-    if(write_blocks%10000==0)
-        printf("hit num:%lu  write_blocks:%lu flush_blocks:%lu\n", hit_num, write_blocks, flush_blocks);
+    if(write_blocks%100000==0)
+        printf("hit num:%lu  hit_parity:%lu write_blocks:%lu flush_blocks:%lu flush_stripes=%lu\n", hit_num, hit_parity, write_blocks, flush_blocks, flush_stripe);
 
 //    ret = pwrite(nvm_fd, nvm_buffer, NVM_BUFFER_SIZE, nvm_buf_hdr->nvm_buf_id*NVM_BUFFER_SIZE);
     if(ret < 0)

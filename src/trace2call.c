@@ -15,15 +15,16 @@
 
 void trace_to_iocall(char *trace_file)
 {
-  //  FILE *trace;
-/*    if((trace = fopen(trace_file, "rt"))==NULL)
+    FILE *trace;
+    if((trace = fopen(trace_file, "rt"))==NULL)
     {
+        perror("[ERROR]");
         exit(0);
-    }*/
+    }
     double time_begin, time_now;
     struct timeval tv_begin, tv_now;
     struct timezone tz_begin, tz_now;
-    int action;
+    char action;
     off_t offset;
     //size_t size;
     char *nvm_buffer;
@@ -37,36 +38,41 @@ void trace_to_iocall(char *trace_file)
         perror("[ERROR]:");
         exit(0);
     }
-    while(scanf("%d %d %lu", &action, &i, &offset)!=EOF)
+    while(!feof(trace))
     {
-//        gettimeofday(&tv_now, &tz_now);
- //       time_now = tv_now.tv_sec + tv_now.tv.usec / 1000000.0;
-            execute(offset);
-            off_t data_global_offset = data_raid_offset;
-            off_t parity_global_offset = parity_raid_offset;
-//            off_t parity_global_offset = parity_raid_offset;
-            for(i = 0;i < PAGESIZE;++i)
-                nvm_buffer[i] = '0';
-  //          if(action=='1')
-            {
-                write_block(data_global_offset, nvm_buffer, 1);
-                write_block(parity_global_offset, nvm_buffer, 0);
-            //    write_block(parity_global_offset, nvm_buffer, 0);
-            //    write_block(parity_global_offset, nvm_buffer);
-            }
-    //        else
-            {
-      //          printf("%c\n",action);
-//                read_block(data_global_offset, nvm_buffer);
-            }
+        ret = fscanf(trace, "%c %d %lu\n", &action, &i, &offset);
+        if(ret < 0) 
+            break;
+        execute(offset);
+        off_t data_global_offset = data_raid_offset;
+        off_t parity_global_offset = parity_raid_offset;
+        for(i = 0;i < PAGESIZE;++i)
+            nvm_buffer[i] = '0';
+        write_block(data_global_offset, nvm_buffer, 1);
+//        if(EvictStrategy%2!=1)
+            write_block(parity_global_offset, nvm_buffer, 0);
     }
     gettimeofday(&tv_now, &tz_now);
     time_now = tv_now.tv_sec + tv_now.tv_usec / 1000000.0;
-    printf("total_run_time=%lfs, ",time_now - time_begin);
-    printf("hit_num=%lu, write_blocks=%lu, flush_blocks=%lu, hit_rate=%lf\n", hit_num, write_blocks, flush_blocks,hit_num*1.0 / write_blocks);
-    printf("hit_data=%lu, hit_data_rate=%lf, hit_parity=%lu, hit_parity_rate=%lf\n", hit_data, hit_data*1.0/write_blocks, hit_parity, hit_parity*1.0 / write_blocks);
-    printf("flush_data=%lu, flush_parity=%lu\n", flush_data, flush_parity);
+    printf("EvictStrategy=%d, total_run_time=%lfs\n",EvictStrategy, time_now - time_begin);
+    printf("write_blocks=%lu, hit_num=%lu, hit_rate=%lf, flush_blocks=%lu\n",write_blocks, hit_num, hit_num*1.0/write_blocks, flush_blocks); 
+    printf("hit_data=%lu, hit_data_rate=%lf, hit_parity=%lu, hit_parity_rate=%lf\n",hit_data, hit_data*1.0/write_blocks, hit_parity, hit_parity*1.0/write_blocks);
+    printf("flush_blocks=%lu, flush_data=%lu, flush_parity=%lu\n",flush_blocks+flush_stripe, flush_data, flush_parity);
+    printf("hit_stripe=%lu, flush_stripe=%lu\n", hit_stripe, flush_stripe);
     free(nvm_buffer);
-//    close(trace);
+
+    FILE *res;
+    if((res = fopen("result", "a+"))==NULL)
+    {
+        perror("[ERROR]");
+        exit(0);
+    }
+    fprintf(res, "EvictStrategy=%d, total_run_time=%lfs\n",EvictStrategy, time_now - time_begin);
+    fprintf(res, "write_blocks=%lu, hit_num=%lu, hit_rate=%lf, flush_blocks=%lu\n",write_blocks, hit_num, hit_num*1.0/write_blocks, flush_blocks); 
+    fprintf(res, "hit_data=%lu, hit_data_rate=%lf, hit_parity=%lu, hit_parity_rate=%lf\n",hit_data, hit_data*1.0/write_blocks, hit_parity, hit_parity*1.0/write_blocks);
+    fprintf(res, "flush_blocks=%lu, flush_data=%lu, flush_parity=%lu\n",flush_blocks+flush_stripe, flush_data, flush_parity);
+    fprintf(res, "hit_stripe=%lu, flush_stripe=%lu\n\n", hit_stripe, flush_stripe);
+    fclose(res); 
+    fclose(trace);
 }
 

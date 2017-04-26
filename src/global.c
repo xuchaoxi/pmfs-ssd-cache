@@ -51,10 +51,12 @@ char ssd4_device[] = "/home/xcx/design/device/ssd4";
 unsigned long hit_num;
 unsigned long hit_parity;
 unsigned long hit_data;
+unsigned long hit_stripe;
 unsigned long write_blocks;
 unsigned long flush_blocks;
 unsigned long flush_data;
 unsigned long flush_parity;
+unsigned long flush_stripe;
 
 NVMBufferDesc *nvm_buffer_descriptors;
 NVMBufferControl *nvm_buffer_control;

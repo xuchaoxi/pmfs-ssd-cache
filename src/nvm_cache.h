@@ -90,10 +90,12 @@ extern NVMStripeBufferBucket *nvm_stripe_table;
 extern unsigned long hit_num;
 extern unsigned long hit_parity;
 extern unsigned long hit_data;
+extern unsigned long hit_stripe;
 extern unsigned long write_blocks;
 extern unsigned long flush_blocks;
 extern unsigned long flush_data;
 extern unsigned long flush_parity;
+extern unsigned long flush_stripe;
 
 extern unsigned long NNVMBuffers;   // 50000
 extern unsigned long NNVMBufferTables;  // 50000

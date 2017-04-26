@@ -91,38 +91,42 @@ NVMBufferDesc *getLRUStripeBuffer(NVMBufferTag nvm_buf_tag)
     NVMStripeBufferDescForLRU *nvm_stripe_hdr_lru;
     unsigned long hashcode = nvmStripeTableHashCode(nvm_buf_tag.stripe_id);
     long stripe_buf_id = nvmStripeTableLookup(nvm_buf_tag.stripe_id, hashcode);
+    // hit in stripe buffer
+    if(stripe_buf_id >= 0)
+    {
+        nvm_stripe_hdr_lru = &nvm_stripe_descriptors_lru[stripe_buf_id];
+        moveToLRUStripeHead(nvm_stripe_hdr_lru);
+        hit_stripe++;
+    }
+    else {
+        nvm_stripe_hdr = getLRUStripe();
+        nvmStripeTableInsert(nvm_buf_tag.stripe_id, hashcode, nvm_stripe_hdr->stripe_buf_id);
+        nvm_stripe_hdr->stripe_id = nvm_buf_tag.stripe_id;
+    }
+
     if(nvm_buffer_control->first_freenvm >= 0)
     {
         nvm_buf_hdr = &nvm_buffer_descriptors[nvm_buffer_control->first_freenvm];
-        // hit in stripe buffer
-        if(stripe_buf_id >= 0)
-        {
-            nvm_stripe_hdr = &nvm_stripe_descriptors[stripe_buf_id];
-            nvm_stripe_hdr_lru = &nvm_stripe_descriptors_lru[stripe_buf_id];
-            moveToLRUStripeHead(nvm_stripe_hdr_lru);
-        }
-        else {
-            nvm_stripe_hdr = getLRUStripe();
-            nvmStripeTableInsert(nvm_buf_tag.stripe_id, hashcode, nvm_stripe_hdr->stripe_buf_id);
-            nvm_stripe_hdr->stripe_id = nvm_buf_tag.stripe_id;
-        }
-        nvm_buffer_control->first_freenvm = nvm_buf_hdr->next_freenvm;
-        nvm_buf_hdr->next_freenvm = -1;
-        nvm_buffer_control->n_usednvm++;
     }
     else { // no free buffer
         nvm_stripe_hdr = &nvm_stripe_descriptors[nvm_stripe_control_lru->last_lru];
         nvm_stripe_hdr_lru = &nvm_stripe_descriptors_lru[nvm_stripe_control_lru->last_lru];
-        moveToLRUStripeHead(nvm_stripe_hdr_lru);
+//        moveToLRUStripeHead(nvm_stripe_hdr_lru);
         flushNVMStripeBuffer(nvm_stripe_hdr);
         unsigned long oldhash = nvmStripeTableHashCode(nvm_stripe_hdr->stripe_id);
         nvmStripeTableDelete(nvm_stripe_hdr->stripe_id, oldhash);
+
+        nvm_stripe_control_lru->last_lru = nvm_stripe_hdr_lru->last_lru;
+        deleteFromLRUStripe(nvm_stripe_hdr_lru);
+        nvm_stripe_descriptors[nvm_stripe_control->last_freebuf].next_freebuf = nvm_stripe_hdr->stripe_buf_id;
+        nvm_stripe_control->last_freebuf = nvm_stripe_hdr->stripe_buf_id;
+        nvm_stripe_control->n_usedbuf--;
  
         nvm_buf_hdr = &nvm_buffer_descriptors[nvm_buffer_control->first_freenvm];
-        nvm_buffer_control->first_freenvm = nvm_buf_hdr->next_freenvm;
-        nvm_buf_hdr->next_freenvm = -1;
-        nvm_buffer_control->n_usednvm++;
     } 
+    nvm_buffer_control->first_freenvm = nvm_buf_hdr->next_freenvm;
+    nvm_buf_hdr->next_freenvm = -1;
+    nvm_buffer_control->n_usednvm++;
     return nvm_buf_hdr;
 }
 
@@ -161,7 +165,7 @@ void *hitInLRUStripeBuffer(NVMBufferDesc *nvm_buf_hdr)
     long stripe_buf_id = nvmStripeTableLookup(stripe_id, hashcode);
     if(stripe_buf_id >= 0)
     {
-        nvm_stripe_hdr = &nvm_stripe_descriptors[stripe_buf_id];
+        hit_stripe++;
         nvm_stripe_hdr_lru = &nvm_stripe_descriptors_lru[stripe_buf_id];
         moveToLRUStripeHead(nvm_stripe_hdr_lru);
     }

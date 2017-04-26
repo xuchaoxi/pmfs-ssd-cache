@@ -19,8 +19,39 @@
 #include "main.h"
 #include "trace2call.h"
 
-int main(int arc, char *argv[])
+int main(int argc, char *argv[])
 {
+    char *trace_file_path[]={ "res/web_0.csv.req","res/trace/web_2.csv.req",
+        "res/trace/hm_0.csv.req","res/trace/mds_1.csv.req",
+        "res/trace/prn_0.csv.req","res/trace/prn_1.csv.req",
+        "res/trace/proj_0.csv.req","res/trace/proj_1.csv.req",
+        "res/trace/src1_0.csv.req","res/trace/src1_1.csv.req", 
+        "res/trace/usr_0.csv.req","res/trace/usr_1.csv.req",
+    };
+    if(argc==4)
+    {
+        NNVMBuffers = atoi(argv[1]);
+        NNVMBufferTables = atoi(argv[1]);
+        STRIPES = atoi(argv[1]);
+        if(atoi(argv[2])==0)
+            EvictStrategy = CLOCK;
+        if(atoi(argv[2])==1)
+            EvictStrategy = CLOCKSTRIPE;
+        if(atoi(argv[2])==2)
+            EvictStrategy = LRU;
+        if(atoi(argv[2])==3)
+            EvictStrategy = LRUSTRIPE;
+        if(atoi(argv[2])==4)
+            EvictStrategy = FIFO;
+        if(atoi(argv[2])==5)
+            EvictStrategy = FIFOSTRIPE;
+    } 
+    else {
+        printf("paramteters are wrong \n");
+        exit(0);
+    }
+
+            
     initNVMBuffer();
 //    initNVMStripeBuffer();
 /*
@@ -64,7 +95,7 @@ int main(int arc, char *argv[])
         exit(0);
     }
     */
-    trace_to_iocall("trace");
+    trace_to_iocall(trace_file_path[atoi(argv[3])]);
 /*
  *
     close(nvm_fd);
@@ -74,36 +105,4 @@ int main(int arc, char *argv[])
     close(ssd3_fd);
     close(ssd4_fd);*/
     return 0;
-/*
-    struct timeval tv_begin, tv_end;
-    double total_time;
-    initPageBuffer(); 
-    gettimeofday(&tv_begin, NULL);
-    while(scanf("%d %d %ld", &con, &rw, &id)!=EOF)
-    {
-      //  if(i%1000000==0)
-        {
-            printf("%d %d %ld\n", con, rw, id);
-            i = 0;
-        }
-        ++i;
-        directWrite(id);
-
-        execute(id);
-        if(rw==0)
-        {
-            writeOrReadPage(data_ssd_id, 0);
-            writeOrReadPage(parity_ssd_id, 0);
-        }
-        else if(rw==1)
-        {
-            writeOrReadPage(data_ssd_id, 1);
-        }
-
-    }
-    gettimeofday(&tv_end, NULL);
-    total_time = (tv_end.tv_usec - tv_begin.tv_usec)/1000000.0+(tv_end.tv_sec - tv_begin.tv_sec);
-    printf("total time = %lf\n",total_time);
-    return 0;
-    */
 }

@@ -15,7 +15,7 @@ OBJS = main.o raid_5.o global.o nvm_buf_table.o nvm_cache.o trace2call.o lru.o l
 all: $(OBJS) nvm-ssd-cache
 	@echo 'Bulid Successfully nvm-ssd-cache...'
 
-nvm-ssd-cache:
+nvm-ssd-cache: $(OBJS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(OBJS) -o $@
 	
 main.o: main.c
