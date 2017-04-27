@@ -13,7 +13,7 @@
 
 extern void initNVMStripeBuffer();
 static NVMStripeBufferDesc *getCLOCKStripe();
-static NVMStripeBufferDesc *evictCLOCKStripeBuffer();
+static void *evictCLOCKStripeBuffer();
 
 void initNVMStripeBufferForClock()
 {
@@ -22,14 +22,14 @@ void initNVMStripeBufferForClock()
     nvm_stripe_control_clock->next_evict = 0;
     nvm_stripe_descriptors_clock = (NVMStripeBufferDescForClock*)malloc(sizeof(NVMStripeBufferDescForClock)*STRIPES);
 
-    NVMStripeBufferDescForClock *nvm_stripe_hdr = nvm_stripe_descriptors_clock;
+    NVMStripeBufferDescForClock *nvm_stripe_hdr_clock = nvm_stripe_descriptors_clock;
     long i;
     for(i = 0;i < STRIPES;++i)
     {
-        nvm_stripe_hdr->stripe_buf_id = i;
-        nvm_stripe_hdr->usage_count = 0;
-        nvm_stripe_hdr->flag = 0;
-        nvm_stripe_hdr++;
+        nvm_stripe_hdr_clock->stripe_buf_id = i;
+        nvm_stripe_hdr_clock->usage_count = 0;
+        nvm_stripe_hdr_clock->flag = 0;
+        nvm_stripe_hdr_clock++;
     }
 }
    
@@ -40,59 +40,49 @@ NVMBufferDesc *getCLOCKStripeBuffer(NVMBufferTag nvm_buf_tag)
     NVMStripeBufferDescForClock *nvm_stripe_hdr_clock;
     unsigned long hashcode = nvmStripeTableHashCode(nvm_buf_tag.stripe_id);
     long stripe_buf_id = nvmStripeTableLookup(nvm_buf_tag.stripe_id, hashcode);
-    if(nvm_buffer_control->first_freenvm >= 0)
+
+    if(nvm_buffer_control->first_freenvm < 0)
+        evictCLOCKStripeBuffer();
+
+    nvm_buf_hdr = &nvm_buffer_descriptors[nvm_buffer_control->first_freenvm];
+    nvm_buffer_control->first_freenvm = nvm_buf_hdr->next_freenvm;
+    nvm_buf_hdr->next_freenvm = -1;
+    nvm_buffer_control->n_usednvm++;
+
+    // note the sequence 
+    // evict then insert
+    if(stripe_buf_id >= 0)
     {
-        nvm_buf_hdr = &nvm_buffer_descriptors[nvm_buffer_control->first_freenvm];
-        nvm_buffer_control->first_freenvm = nvm_buf_hdr->next_freenvm;
-        nvm_buf_hdr->next_freenvm = -1;
-        nvm_buffer_control->n_usednvm++;
-        if(stripe_buf_id >= 0)
-        {
-            nvm_stripe_hdr_clock = &nvm_stripe_descriptors_clock[stripe_buf_id];
-            nvm_stripe_hdr_clock->usage_count++;
-        }
-        else {
-            nvm_stripe_hdr = getCLOCKStripe();
-            nvmStripeTableInsert(nvm_buf_tag.stripe_id, hashcode, nvm_stripe_hdr->stripe_buf_id);
-            nvm_stripe_hdr->stripe_id = nvm_buf_tag.stripe_id;
-            nvm_stripe_hdr_clock = &nvm_stripe_descriptors_clock[nvm_stripe_hdr->stripe_buf_id];
-            nvm_stripe_hdr_clock->flag = 1;
-            nvm_stripe_hdr_clock->usage_count++;
-        }
+        nvm_stripe_hdr_clock = &nvm_stripe_descriptors_clock[stripe_buf_id];
+        nvm_stripe_hdr_clock->usage_count++;
+        hit_stripe++;
     }
     else {
-            evictCLOCKStripeBuffer();        
-            nvm_buf_hdr = &nvm_buffer_descriptors[nvm_buffer_control->first_freenvm];
-            nvm_buffer_control->first_freenvm = nvm_buf_hdr->next_freenvm;
-            nvm_buf_hdr->next_freenvm = -1;
-            nvm_buffer_control->n_usednvm++;
-        }
+        nvm_stripe_hdr = getCLOCKStripe();
+        nvmStripeTableInsert(nvm_buf_tag.stripe_id, hashcode, nvm_stripe_hdr->stripe_buf_id);
+        nvm_stripe_hdr->stripe_id = nvm_buf_tag.stripe_id;
+        nvm_stripe_hdr_clock = &nvm_stripe_descriptors_clock[nvm_stripe_hdr->stripe_buf_id];
+        nvm_stripe_hdr_clock->flag = 1;
+    }
+
     return nvm_buf_hdr;
 }
 
 static NVMStripeBufferDesc *getCLOCKStripe()
 {
-    NVMStripeBufferDescForClock *nvm_stripe_hdr_clock;
     NVMStripeBufferDesc *nvm_stripe_hdr;
-    if(nvm_stripe_control->first_freebuf >= 0)
-    {
-        nvm_stripe_hdr = &nvm_stripe_descriptors[nvm_stripe_control->first_freebuf];
-        nvm_stripe_hdr_clock = &nvm_stripe_descriptors_clock[nvm_stripe_control->first_freebuf];
-        
-        nvm_stripe_control->first_freebuf = nvm_stripe_hdr->next_freebuf;
-        nvm_stripe_hdr->next_freebuf = -1;
-        nvm_stripe_control->n_usedbuf++;
+    if(nvm_stripe_control->first_freebuf < 0)
+        evictCLOCKStripeBuffer();
 
-        nvm_stripe_hdr_clock->usage_count++;
-        nvm_stripe_hdr_clock->flag = 1;
-    }
-    else {
-        nvm_stripe_hdr = evictCLOCKStripeBuffer();   
-    }
+    nvm_stripe_hdr = &nvm_stripe_descriptors[nvm_stripe_control->first_freebuf];
+    nvm_stripe_control->first_freebuf = nvm_stripe_hdr->next_freebuf;
+    nvm_stripe_hdr->next_freebuf = -1;
+    nvm_stripe_control->n_usedbuf++;
+
     return nvm_stripe_hdr;
 }
 
-static NVMStripeBufferDesc *evictCLOCKStripeBuffer()
+static void *evictCLOCKStripeBuffer()
 {
     NVMStripeBufferDescForClock *nvm_stripe_hdr_clock;
     NVMStripeBufferDesc *nvm_stripe_hdr;
@@ -100,11 +90,13 @@ static NVMStripeBufferDesc *evictCLOCKStripeBuffer()
     {
         nvm_stripe_hdr_clock = &nvm_stripe_descriptors_clock[nvm_stripe_control_clock->next_evict];
         nvm_stripe_hdr = &nvm_stripe_descriptors[nvm_stripe_control_clock->next_evict];
+
         nvm_stripe_control_clock->next_evict++;
         if(nvm_stripe_control_clock->next_evict >= STRIPES)
         {
             nvm_stripe_control_clock->next_evict = 0;
         }
+
         if(nvm_stripe_hdr_clock->usage_count > 0)
         {
             nvm_stripe_hdr_clock->usage_count--;
@@ -115,7 +107,11 @@ static NVMStripeBufferDesc *evictCLOCKStripeBuffer()
             flushNVMStripeBuffer(nvm_stripe_hdr);
             unsigned long oldhash = nvmStripeTableHashCode(nvm_stripe_hdr->stripe_id);
             nvmStripeTableDelete(nvm_stripe_hdr->stripe_id, oldhash);
-            return nvm_stripe_hdr;
+
+            nvm_stripe_hdr->next_freebuf = nvm_stripe_control->first_freebuf;
+            nvm_stripe_control->first_freebuf = nvm_stripe_hdr->stripe_buf_id;
+            nvm_stripe_control->n_usedbuf--;
+            break;
         }
     }
     return NULL;
@@ -130,6 +126,7 @@ void *hitInCLOCKStripeBuffer(NVMBufferDesc *nvm_buf_hdr)
     long stripe_buf_id = nvmStripeTableLookup(stripe_id, hashcode);
     if(stripe_buf_id >= 0)
     {
+        hit_stripe++;
         nvm_stripe_hdr_clock = &nvm_stripe_descriptors_clock[stripe_buf_id];
         nvm_stripe_hdr_clock->usage_count++;
     }
