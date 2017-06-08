@@ -25,6 +25,8 @@ void initNVMStripeBufferForSort()
     for(i = 0;i < STRIPES;++i)
     {
         nvm_buf_hdr_sort->stripe_buf_id = i;
+        num_buf_hdr_sort->hit_num = 0;
+        num_buf_hdr_sort->hit_avg = 0.0;
         nvm_buf_hdr_sort->next_sort = -1;
         nvm_buf_hdr_sort->last_sort = -1;
         ++nvm_buf_hdr_sort;
@@ -85,8 +87,8 @@ NVMBufferDesc *getSortStripeBuffer(NVMBufferTag nvm_buf_tag)
     {
         hit_stripe++;
         nvm_stripe_hdr_sort = &nvm_stripe_descriptors_sort[stripe_buf_id];
+        nvm_stripe_hdr_sort->hit_num++;
         moveToSortStripe(nvm_stripe_hdr_sort);
-        hit_stripe++;
     }
     else {
         nvm_stripe_hdr = getSortStripe();

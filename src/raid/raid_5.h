@@ -38,4 +38,6 @@ extern char ssd2_device[];
 extern char ssd3_device[];
 extern char ssd4_device[];
 
+extern int ssd0_fd, ssd1_fd, ssd2_fd, ssd3_fd, ssd4_fd, nvm_fd;
+
 

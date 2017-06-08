@@ -61,6 +61,7 @@ typedef struct
 typedef struct 
 {
     long stripe_id;
+    long buf_num;
     long stripe_buf_id;  //  buffer id
     long next_freebuf;  
 } NVMStripeBufferDesc;
@@ -115,5 +116,7 @@ extern void *flushNVMStripeBuffer(NVMStripeBufferDesc *nvm_buf_hdr);
 extern NVMEvictionStrategy EvictStrategy;
 
 extern int nvm_fd;
+extern int ssd0_fd, ssd1_fd, ssd2_fd, ssd3_fd, ssd4_fd;
+extern double pm_time, flush_time;
 
 #endif

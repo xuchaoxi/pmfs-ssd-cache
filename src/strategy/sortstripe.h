@@ -13,6 +13,8 @@ typedef struct
     long stripe_buf_id;
     long next_lru;
     long last_lru;
+    long hit_num;
+    float hit_avg;
 } NVMStripeBufferDescForSort;
 
 typedef struct 

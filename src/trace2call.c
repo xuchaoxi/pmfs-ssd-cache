@@ -18,7 +18,7 @@ void trace_to_iocall(char *trace_file)
     FILE *trace;
     if((trace = fopen(trace_file, "rt"))==NULL)
     {
-        perror("[ERROR]");
+        perror("[ERROR]:trace2call open trace_file");
         exit(0);
     }
     double time_begin, time_now;
@@ -49,12 +49,11 @@ void trace_to_iocall(char *trace_file)
         for(i = 0;i < PAGESIZE;++i)
             nvm_buffer[i] = '0';
         write_block(data_global_offset, nvm_buffer, 1);
-//        if(EvictStrategy%2!=1)
-            write_block(parity_global_offset, nvm_buffer, 0);
+//        write_block(parity_global_offset, nvm_buffer, 0);
     }
     gettimeofday(&tv_now, &tz_now);
     time_now = tv_now.tv_sec + tv_now.tv_usec / 1000000.0;
-    printf("EvictStrategy=%d, total_run_time=%lfs\n",EvictStrategy, time_now - time_begin);
+    printf("EvictStrategy=%d, total_run_time=%lfs, pm_time=%lfs, flush_time=%lfs\n",EvictStrategy, time_now - time_begin, pm_time, flush_time);
     printf("write_blocks=%lu, hit_num=%lu, hit_rate=%lf, flush_blocks=%lu\n",write_blocks, hit_num, hit_num*1.0/write_blocks, flush_blocks); 
     printf("hit_data=%lu, hit_data_rate=%lf, hit_parity=%lu, hit_parity_rate=%lf\n",hit_data, hit_data*1.0/write_blocks, hit_parity, hit_parity*1.0/write_blocks);
     printf("flush_blocks=%lu, flush_data=%lu, flush_parity=%lu\n",flush_blocks+flush_stripe, flush_data, flush_parity);
@@ -67,7 +66,7 @@ void trace_to_iocall(char *trace_file)
         perror("[ERROR]");
         exit(0);
     }
-    fprintf(res, "EvictStrategy=%d, total_run_time=%lfs\n",EvictStrategy, time_now - time_begin);
+    fprintf(res, "EvictStrategy=%d, total_run_time=%lfs, pm_time=%lfs, flush_time=%lfs\n",EvictStrategy, time_now - time_begin, pm_time, flush_time);
     fprintf(res, "write_blocks=%lu, hit_num=%lu, hit_rate=%lf, flush_blocks=%lu\n",write_blocks, hit_num, hit_num*1.0/write_blocks, flush_blocks); 
     fprintf(res, "hit_data=%lu, hit_data_rate=%lf, hit_parity=%lu, hit_parity_rate=%lf\n",hit_data, hit_data*1.0/write_blocks, hit_parity, hit_parity*1.0/write_blocks);
     fprintf(res, "flush_blocks=%lu, flush_data=%lu, flush_parity=%lu\n",flush_blocks+flush_stripe, flush_data, flush_parity);

@@ -53,9 +53,6 @@ int main(int argc, char *argv[])
 
             
     initNVMBuffer();
-//    initNVMStripeBuffer();
-/*
- *
     nvm_fd = open(nvm_device, O_RDWR | O_DIRECT);
     ssd0_fd = open(ssd0_device, O_RDWR | O_DIRECT);
     ssd1_fd = open(ssd1_device, O_RDWR | O_DIRECT);
@@ -94,15 +91,12 @@ int main(int argc, char *argv[])
         perror("[ERROR]:ssd4_fd ");
         exit(0);
     }
-    */
     trace_to_iocall(trace_file_path[atoi(argv[3])]);
-/*
- *
     close(nvm_fd);
     close(ssd0_fd);
     close(ssd1_fd);
     close(ssd2_fd);
     close(ssd3_fd);
-    close(ssd4_fd);*/
+    close(ssd4_fd);
     return 0;
 }

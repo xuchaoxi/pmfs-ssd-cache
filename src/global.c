@@ -40,11 +40,11 @@ int ssd3_fd;
 int ssd4_fd;
 
 char nvm_device[] = "/mnt/pmfs/nvm";
-char ssd0_device[] = "/home/xcx/design/device/ssd0";
-char ssd1_device[] = "/home/xcx/design/device/ssd1";
-char ssd2_device[] = "/home/xcx/design/device/ssd2";
-char ssd3_device[] = "/home/xcx/design/device/ssd3";
-char ssd4_device[] = "/home/xcx/design/device/ssd4";
+char ssd0_device[] = "/dev/sdb1";
+char ssd1_device[] = "/dev/sdb2";
+char ssd2_device[] = "/dev/sdb3";
+char ssd3_device[] = "/dev/sdb5";
+char ssd4_device[] = "/dev/sdb6";
 
 
 
@@ -57,6 +57,7 @@ unsigned long flush_blocks;
 unsigned long flush_data;
 unsigned long flush_parity;
 unsigned long flush_stripe;
+double pm_time, flush_time;
 
 NVMBufferDesc *nvm_buffer_descriptors;
 NVMBufferControl *nvm_buffer_control;

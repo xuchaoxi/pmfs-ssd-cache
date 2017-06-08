@@ -50,6 +50,8 @@ void initNVMBuffer()
     }
     nvm_buffer_descriptors[NNVMBuffers-1].next_freenvm = -1;
 
+    pm_time = 0.0;
+    flush_time = 0.0;
     hit_num = 0;
     hit_data = 0;
     hit_parity = 0;
@@ -79,6 +81,7 @@ void initNVMStripeBuffer()
     for(i = 0;i < STRIPES;++i)
     {
         nvm_stripe_hdr->stripe_buf_id = i;
+        nvm_stripe_hdr->buf_num = 0;
         nvm_stripe_hdr->next_freebuf = i+1;
         nvm_stripe_hdr++;
     }
@@ -175,17 +178,21 @@ void *flushNVMBuffer(NVMBufferDesc *nvm_buf_hdr)
 {
     char *nvm_buffer;
     int ret;
+    struct timeval tv_begin, tv_end;
+    double time_begin, time_end;
 
     int data_id = nvm_buf_hdr->nvm_buf_tag.data_ssd_id;
     int parity_id = nvm_buf_hdr->nvm_buf_tag.parity_ssd_id;
     off_t ssd_offset = nvm_buf_hdr->nvm_buf_tag.ssd_offset;
+
 
     int ssd_id = (data_id==-1 ? parity_id : data_id);
     if(data_id < 0)
         flush_parity++;
     else 
         flush_data++;
-    /*
+    gettimeofday(&tv_begin, NULL);
+    time_begin = tv_begin.tv_sec + tv_begin.tv_usec/1000000.0;
     // page
     ret = posix_memalign(&nvm_buffer, 512, sizeof(char)*PAGESIZE);
     if(ret < 0)
@@ -194,22 +201,21 @@ void *flushNVMBuffer(NVMBufferDesc *nvm_buf_hdr)
         free(nvm_buffer);
         exit(0);
     }
-//    ret = pread(nvm_fd, nvm_buffer, NVM_BUFFER_SIZE, nvm_buf_hdr->nvm_buf_id*NVM_BUFFER_SIZE);
+    ret = pread(nvm_fd, nvm_buffer, NVM_BUFFER_SIZE, nvm_buf_hdr->nvm_buf_id*NVM_BUFFER_SIZE);
     if(ret < 0)
     {
         perror("[ERROR]:");
         printf("flushNVMBuffer():---- read from NVM: nvm_fd=%d, errorcode=%d, offset=%lu\n", nvm_fd, ret, nvm_buf_hdr->nvm_buf_id*NVM_BUFFER_SIZE);
         exit(0);
     }
-//    ret = writeOrReadPage(ssd_id, ssd_offset, nvm_buffer, 1);
+    ret = writeOrReadPage(ssd_id, ssd_offset, nvm_buffer, 1);
     if(ret < 0)
     {
         perror("[ERROR]:");
-        return nvm_buf_hdr;
         printf("flushNVMBuffer()------write to data_ssd_id=%d, errorcode=%d, offset=%lu\n",data_id, ret, nvm_buf_hdr->nvm_buf_tag.offset);
-        return nvm_buf_hdr;
         exit(0);
     }
+    /*
     ret = writeOrReadPage(parity_id, ssd_offset,nvm_buffer, 1);
     if(ret < 0)
     {
@@ -217,7 +223,11 @@ void *flushNVMBuffer(NVMBufferDesc *nvm_buf_hdr)
         printf("flushNVMBuffer()------write to parity_ssd_id=%d, errorcode=%d, offset=%lu\n",parity_id, ret, nvm_buf_hdr->nvm_buf_tag.offset);
         exit(0);
     }
-    free(nvm_buffer);*/
+    */
+    gettimeofday(&tv_end, NULL);
+    time_end = tv_end.tv_sec + tv_end.tv_usec/1000000.0;
+    flush_time += (time_end - time_begin);
+    free(nvm_buffer);
     flush_blocks += 1;
     return NULL;
 }
@@ -228,8 +238,35 @@ void *flushNVMStripeBuffer(NVMStripeBufferDesc *nvm_stripe_hdr)
     off_t page_id = (stripe_id +1)* (N + 1) ;   // raid page id
     int i = 0;
     int firstOrlast = 0;
+    int ret;
     flush_stripe++;
-    for(i = 0; i < N+1 ;++i)
+    long ssd_offset = stripe_id;
+    int ssd_id = (stripe_id / rotate_width)%(N+1);
+    char *nvm_buffer;
+    struct timeval tv_begin, tv_end;
+    double time_begin, time_end;
+    gettimeofday(&tv_begin, NULL);
+    time_begin = tv_begin.tv_sec + tv_begin.tv_usec/1000000.0;
+    ret = posix_memalign(&nvm_buffer, 512, sizeof(char)*PAGESIZE);
+    if(ret < 0)
+    {
+        perror("[ERROR]:flushNVMStripeBuffer()------posix_memalign");
+        free(nvm_buffer);
+        exit(0);
+    }
+    for(i = 0;i < PAGESIZE;++i)
+        nvm_buffer[i] = '.';
+    ret = writeOrReadPage(ssd_id, ssd_offset, nvm_buffer, 1);
+    if(ret < 0)
+    {
+        perror("[ERROR]:flushNVMStripe write back parity");
+        exit(0);
+    }
+    free(nvm_buffer);
+    gettimeofday(&tv_end, NULL);
+    time_end = tv_end.tv_sec + tv_end.tv_usec/1000000.0;
+    flush_time += (time_end - time_begin);
+    for(i = 0; i < N+1; ++i)
     {
         NVMBufferTag nvm_buf_tag;
         nvm_buf_tag.offset = page_id + i;
@@ -259,6 +296,7 @@ void *flushNVMStripeBuffer(NVMStripeBufferDesc *nvm_stripe_hdr)
             nvmBufferTableDelete(&nvm_buf_tag, hashcode);
         }
     }
+    nvm_stripe_hdr->buf_num = 0;
     return NULL;
 }
 
@@ -309,6 +347,8 @@ void write_block(off_t offset, char *nvm_buffer, int flag)
   //  void *nvm_buf_block;
     bool found;
     int ret;
+    struct timeval tv_begin, tv_now;
+    double time_begin, time_now;
 
     static NVMBufferTag nvm_buf_tag;
     static NVMBufferDesc *nvm_buf_hdr;
@@ -325,10 +365,16 @@ void write_block(off_t offset, char *nvm_buffer, int flag)
         printf("[INFO] write()----offset=%lu\n", offset);
     nvm_buf_hdr = NVMBufferAlloc(nvm_buf_tag, &found);
     write_blocks++;
-    if(write_blocks%100000==0)
-        printf("hit num:%lu  hit_parity:%lu write_blocks:%lu flush_blocks:%lu flush_stripes=%lu\n", hit_num, hit_parity, write_blocks, flush_blocks, flush_stripe);
+   // if(write_blocks%10000==0)
+     //   printf("hit num:%lu  hit_parity:%lu write_blocks:%lu flush_blocks:%lu flush_stripes=%lu\n", hit_num, hit_parity, write_blocks, flush_blocks, flush_stripe);
 
-//    ret = pwrite(nvm_fd, nvm_buffer, NVM_BUFFER_SIZE, nvm_buf_hdr->nvm_buf_id*NVM_BUFFER_SIZE);
+    gettimeofday(&tv_begin, NULL);
+    time_begin = tv_begin.tv_sec + tv_begin.tv_usec/1000000.0;
+    ret = pwrite(nvm_fd, nvm_buffer, NVM_BUFFER_SIZE, nvm_buf_hdr->nvm_buf_id*NVM_BUFFER_SIZE);
+    gettimeofday(&tv_now, NULL);
+    time_now = tv_now.tv_sec + tv_now.tv_usec/1000000.0;
+    pm_time += (time_now - time_begin);
+
     if(ret < 0)
     {
         printf("[ERROR]: write_block nvm_fd=%d, errorcode=%d, offset=%lu\n", nvm_fd, ret, offset);
@@ -336,7 +382,7 @@ void write_block(off_t offset, char *nvm_buffer, int flag)
         exit(0);
     }
 }
-    
+   
 
 
 

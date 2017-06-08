@@ -78,44 +78,45 @@ void execute(off_t offset)
 
 int writeOrReadPage(int ssd_id, off_t offset, char *buffer, int flag)
 {
+    int ssdfd;
     switch(ssd_id)
     {
-        case 0 : ssd_path = ssd0_device;
+        case 0 : ssdfd = ssd0_fd;
                  break;
-        case 1 : ssd_path = ssd1_device;
+        case 1 : ssdfd = ssd1_fd;
                  break;
-        case 2 : ssd_path = ssd2_device;
+        case 2 : ssdfd = ssd2_fd;
                  break;
-        case 3 : ssd_path = ssd3_device;
+        case 3 : ssdfd = ssd3_fd;
                  break;
-        case 4 : ssd_path = ssd4_device;
+        case 4 : ssdfd = ssd4_fd;
                  break;
     }
-/*    int ssdfd = open(ssd_path, O_WRONLY | O_DIRECT);
+/*
+ *
+ * int ssdfd = open(ssd_path, O_WRONLY | O_DIRECT);
     if(ssdfd < 0)
     {
         perror("[ERROR]:Fail to open ssd device");
         exit(0);
     }
     */
-//    initPageBuffer();
- 
-    // ssd_page_offset 
- //   off_t offset = global_stripe_id*PAGENUM +  page_off;
     
+  //  initPageBuffer();
+ 
     int code;
    // if(flag==1)
-  //      code = pwrite(ssdfd, buffer, PAGESIZE, offset*PAGESIZE);   
+        code = pwrite(ssdfd, buffer, PAGESIZE, offset*PAGESIZE);   
  //   else if(flag==0)
     //    code = pread(ssdfd, buffer, PAGENUM, offset*PAGESIZE);
-/*
+
     if(code < 0)
     {
         perror("[ERROR]:Fail to write or read page buffer");
         exit(0);
     }
-*/
-    //close(ssdfd);
+
+ //   close(ssdfd);
     return code;
 }
 
